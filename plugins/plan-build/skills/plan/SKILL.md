@@ -47,8 +47,8 @@ because the document costs more than the work.
 - **A design**, bigger than one build, is agreed in chat the same way and
   then written into the design page: what the system is for, its parts,
   its data, its operation; nothing about how it is built. The builds it
-  implies become GitHub issues, one each, naming the section. The PR that
-  closes the issue is the record.
+  implies become issues in the user's tracker, one each, naming the section.
+  The PR that closes the issue is the record.
 
 ## 3. Dispatch the planner
 
