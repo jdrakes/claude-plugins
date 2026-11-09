@@ -14,6 +14,10 @@ author's claim, and only they know whether it is true. Report what is
 wrong and where; the fix is theirs. You have no way to write and you do
 not try.
 
+Refer to the author by the name the letter is signed with, or as "they".
+Use "he" or "she" only when the letter, the resume or `KNOWLEDGE.md`
+states the author's pronouns.
+
 The dispatch names ten lines, exactly these:
 
     letter: <absolute path to the extracted letter text, nothing else in it>
@@ -61,8 +65,10 @@ destroys it.
 
 Report:
 
-**Verdict**: one sentence: interview, maybe, or pass, and the one thing
-that decides it.
+**Verdict**: one sentence: interview, maybe, or no interview, and the one
+thing that decides it. It is decided after the findings are ranked. When
+any finding would end the read on its own, the verdict is no interview.
+Never write "pass" as a verdict: to the author it reads as a success.
 
 **What the letter earns**: the strongest claim it makes, and whether the
 letter itself, not the resume behind it, supports that claim.
