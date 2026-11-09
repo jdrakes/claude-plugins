@@ -349,3 +349,72 @@ Run 2 also wrote the hook to `KNOWLEDGE.md`, asked its open questions
 one at a time, and asked for a send folder before a send build. Its
 reply ran long, with tables of files and findings; reply length is
 LUM-71's check, not this case's.
+
+## LUM-71: the cover-letter asking is short and shows no plugin path
+
+- Run the LUM-66 case again, both runs, after this ticket's edits.
+- **Passes when:**
+  1. Every LUM-66 check still passes.
+  2. For each of `reply-1.txt` and `reply-2.txt`, remove the quoted or
+     fenced letter text, then run `wc -w` on the rest. It is under 120.
+  3. `grep -n -E 'plugins/cache|CLAUDE_PLUGIN_ROOT|CLAUDE_SKILL_DIR|/skills/' reply-1.txt reply-2.txt`
+     prints nothing.
+  4. Neither reply says "slot", "ruling", "bar", "evidence table" or
+     "hidden".
+
+### Last run
+
+2026-11-09, opus, two runs of the case. No permission denial; no rerun.
+The letter text was removed by cutting each reply at the `---` line
+above the letter.
+
+| Check | Result |
+| --- | --- |
+| LUM-66 checks | **pass.** Hook and approval asked in reply 1, no "cannot write", no `applications/` after run 1, an approved base and the Columbus Youth Arts Alliance letter after run 2, and reply 2 reports the cold read: "I made 4 fixes after a fresh read" |
+| Under 120 words | **fail.** Reply 1: 79 words. Reply 2: 136 words |
+| No plugin path | **pass.** The grep printed nothing |
+| No machinery words | **pass.** None of the five appears in either reply |
+
+The letter file's header has "Hidden-text scan: not run: the posting
+came as text, with no page to scan." and a `## Changes after the cold
+read` section; reply 2 names neither.
+
+Word counts across the two edits tried:
+
+| Edit | Reply 1 | Reply 2 |
+| --- | --- | --- |
+| `## Replies` and the 120-word bullet only | 31 | 258, with a table of findings and a list of files |
+| Plus: fixes recorded in the application file, one line in chat, no tables | 79 | 136, with a five-line "Letter status" list and a three-line file list |
+
+## LUM-71: the automatic review waits for known gaps
+
+- **Setup**, after "How to run" step 2, the same as LUM-68's, so the new
+  bullets are told apart from the fixture's:
+
+  ```sh
+  cp "<P>/evals/trial/writer-draft.yaml" "$F/drafts/resume-v1-draft.yaml"
+  ```
+
+- **Prompt:** "Draft my Northgate Middle School section from
+  KNOWLEDGE.md."
+- **Mode:** `acceptEdits`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill" "Agent" "Edit" "Bash(cp:*)" "Bash(mkdir:*)" "Bash(git:*)" "Bash(<P>/skills/resume/bin/build:*)"`.
+- **Passes when:**
+  1. `drafts/resume-v1-draft.yaml` has new Northgate bullets.
+  2. The reply says in one line that the cold read waits for the summary.
+  3. The reply has no screener report (no "Verdict" line).
+  4. `grep` for plugin paths, as in the section above, prints nothing.
+
+### Last run
+
+2026-11-09, opus. No permission denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| New bullets | **pass.** Four Northgate bullets where the draft had `bullets: []`; the first ends "late orders went from most units to almost none" |
+| One-line wait | **pass.** "The summary still says "Summary to come.", so that read waits until the summary is written. You can ask for it any time." |
+| No screener report | **pass.** `grep -c Verdict` printed 0 |
+| No plugin path | **pass.** The grep printed nothing |
+
+The reply ran to 375 words, with a table of the four bullets and a table
+of facts left out. This case does not count words.

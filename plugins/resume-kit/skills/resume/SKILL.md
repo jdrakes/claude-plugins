@@ -160,8 +160,14 @@ exists. Confirm `KNOWLEDGE.md` holds interview facts for the role, else run
 `defaults:` is `${CLAUDE_SKILL_DIR}/content-rules.md`. `own-rules:` is the
 working directory's `CLAUDE.md` when it has one, else "none".
 
-Relay its report, build the draft to a temporary path, and run
-`resume-kit:resume-review` on it. The summary is not the writer's. Read
+Relay its report and build the draft to a temporary path. Before
+running `resume-kit:resume-review` on it, look for gaps the person
+already knows of: a summary that is still a placeholder or the
+starter's example, a role with no bullets, example content not yet
+replaced. When there is one, do not run the review. Say in one line
+that the cold read waits until those are written and that they can
+ask for it any time. Otherwise run it. A review the person asks for
+always runs. The summary is not the writer's. Read
 `${CLAUDE_SKILL_DIR}/content-rules.md` and the content folder's
 `## Content rules` first, since they bind the summary too; then draft two
 candidates in chat, in the author's register, for the user to pick or
@@ -179,3 +185,17 @@ example and compares that render elementwise against the committed
 baseline, failing on any line whose text, page, column or
 position moved (§7 of `design-spec.md`). If the move was deliberate,
 rerun it with `--update` and commit the new baseline with the change.
+
+## Replies
+
+- A reply that needs a decision starts with it: one plain line per
+  decision, numbered when there is more than one, before any
+  explanation. Detail belongs in the file it is about (`KNOWLEDGE.md`,
+  the draft, the application file), not in the chat.
+- Never show a path inside this plugin, such as one under the plugin
+  cache. Name the person's own files by their place in the content
+  folder, such as `drafts/resume-v1-draft.yaml`.
+- Say what the kit's machinery means for the person, not its name: no
+  slots, rulings, word bars, evidence tables, dispatch lines or agent
+  names. "The letter is 60 words longer than your usual one", not "60
+  over the bar".

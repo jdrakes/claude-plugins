@@ -58,6 +58,9 @@ curl -sL -A "Mozilla/5.0" "<posting url>" -o /tmp/posting-<slug>.html
 Given a file the user names instead of a URL, read it, and use it as the
 posting body. Record title, team, location and compensation.
 
+Given the posting's text in the message itself, save it to
+`/tmp/posting-<slug>.txt` and use it as the body.
+
 ## 2. Audit the application form, and report before drafting
 
 List every question the form asks, marking which are required. Then:
@@ -79,11 +82,12 @@ List every question the form asks, marking which are required. Then:
 
   Most hits on the first line are ordinary theme CSS; say so rather than
   alarming the user. A hit on the second line is not, and is reported
-  verbatim with its surrounding text. Say explicitly "none found" when
-  there are none, because "I checked and found nothing" and "I did not
-  check" are different answers and the user cannot tell them apart
-  otherwise. When the posting came as a file with no HTML, say the scan
-  could not run and why.
+  verbatim with its surrounding text. Record the result in the
+  application file's header either way: "Hidden-text scan: none found",
+  the hits, or "not run: the posting came as text, with no page to
+  scan". "I checked and found nothing" and "I did not check" are
+  different answers, and the header keeps them apart. Raise it in chat
+  only when the second grep found something.
 
 ## 3. Pick the base, and decide its paragraph order
 
@@ -280,8 +284,10 @@ findings into two piles, because the wrong sort is what makes this slow:
 against `KNOWLEDGE.md` or the resume, a vague antecedent, a repeated word,
 a sentence that overstates its source. These have a right answer that the
 record already settles, so asking costs a round trip and buys nothing. Fix
-each one, say what you changed and why, and let the user overturn it in
-one word. A finding you can resolve against a source is **not** a decision
+each one and record what you changed and why in the application file's
+`## Changes after the cold read`. In chat, one line says how many you
+fixed, that the application file lists them, and that any one can be
+overturned in one word. A finding you can resolve against a source is **not** a decision
 for the user. This includes resolving a finding **against** the reader:
 when the record supports the letter and the reader compared it to the
 wrong bullet, say so with the source rather than softening the sentence.
@@ -317,13 +323,15 @@ the rest, so the finished file carries these sections in this order:
 2. `## Letter`
 3. `## Rulings`, one numbered entry per decision the user made, attributed
    and dated.
-4. `## Confirm before sending`, which must end at zero items before the
+4. `## Changes after the cold read`, one entry per finding step 9 fixed:
+   what the reader found, what changed, and the source that settles it.
+5. `## Confirm before sending`, which must end at zero items before the
    letter is sendable.
-5. `## Positioning conflict`, when there is one.
-6. `## Gap against the posting`, a table of the posting's stated
+6. `## Positioning conflict`, when there is one.
+7. `## Gap against the posting`, a table of the posting's stated
    requirements against the user's evidence, naming the weakest point
    honestly.
-7. `## Evidence`, every claim traced, plus a "Not used on purpose" list
+8. `## Evidence`, every claim traced, plus a "Not used on purpose" list
    with reasons.
 
 ## 11. Push new facts back to `KNOWLEDGE.md`
@@ -380,3 +388,22 @@ and stop. Never route around a missing tool. For example, do not give
 It does not build or modify the resume, does not change any `*.yaml`,
 does not submit an application, and does not commit. It stops when the
 letter is sendable and `## Confirm before sending` is empty.
+
+## Replies
+
+- A reply that needs a decision starts with it: one plain line per
+  decision, numbered when there is more than one, before any
+  explanation. Detail belongs in the file it is about (`KNOWLEDGE.md`,
+  the draft, the application file), not in the chat.
+- Never show a path inside this plugin, such as one under the plugin
+  cache. Name the person's own files by their place in the content
+  folder, such as `drafts/resume-v1-draft.yaml`.
+- Say what the kit's machinery means for the person, not its name: no
+  slots, rulings, word bars, evidence tables, dispatch lines or agent
+  names. "The letter is 60 words longer than your usual one", not "60
+  over the bar".
+- The asking in a reply, from step 3's first-letter message or from
+  step 9, comes to under 120 words, not counting letter text shown
+  below it. That count covers everything else in the reply: the
+  decisions, the cold read's result, the fixes and where files went.
+  No tables of findings or files; those are in the application file.

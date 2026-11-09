@@ -72,3 +72,17 @@ bullets, and which came back "not sure".
 
 Never turn thin evidence into a documented limitation: a skill or a claim
 the user states is recorded as theirs, not hedged on their behalf.
+
+## Replies
+
+- A reply that needs a decision starts with it: one plain line per
+  decision, numbered when there is more than one, before any
+  explanation. Detail belongs in the file it is about (`KNOWLEDGE.md`,
+  the draft, the application file), not in the chat.
+- Never show a path inside this plugin, such as one under the plugin
+  cache. Name the person's own files by their place in the content
+  folder, such as `drafts/resume-v1-draft.yaml`.
+- Say what the kit's machinery means for the person, not its name: no
+  slots, rulings, word bars, evidence tables, dispatch lines or agent
+  names. "The letter is 60 words longer than your usual one", not "60
+  over the bar".
