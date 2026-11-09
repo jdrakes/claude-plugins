@@ -146,15 +146,19 @@ def parse_needles(text):
 
 def read_private_needles(environment):
     """Return (needles, error). needles is None when LEAK_NEEDLES_FILE is
-    unset; error is a message when it is set but cannot be read."""
+    unset; error is a message when it is set but cannot be read, is not
+    UTF-8, or holds no needles (a scan that checks nothing must not pass)."""
     path = environment.get(PRIVATE_NEEDLES_VARIABLE)
     if not path:
         return None, None
     try:
         with open(path, "r", encoding="utf-8") as handle:
-            return parse_needles(handle.read()), None
-    except OSError as problem:
+            needles = parse_needles(handle.read())
+    except (OSError, UnicodeDecodeError) as problem:
         return None, f"{PRIVATE_NEEDLES_VARIABLE} is set but unreadable: {problem}"
+    if not needles:
+        return None, f"{PRIVATE_NEEDLES_VARIABLE} is set but the file has no needles: {path}"
+    return needles, None
 
 
 def run_checked_scan(repo_root, environment):
@@ -215,6 +219,32 @@ def run_private_needles_self_test():
             handle.write("plimbrotack appears here, and so does a blank-ish line.\n")
         code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
         assert code == 0, f"comment text must not be a needle, got: {output!r}"
+        # The scan above passes even without the # filter, because the whole
+        # comment line is not a substring of the planted text. This pins it.
+        parsed = parse_needles("# x\n\n  \ny\n")
+        assert parsed == ["y"], f"comment and blank lines must be dropped, got: {parsed!r}"
+
+        undecodable_path = os.path.join(temp_dir, "undecodable.txt")
+        with open(undecodable_path, "wb") as handle:
+            handle.write(b"zorblaxquent\n\xff\n")
+        os.environ[PRIVATE_NEEDLES_VARIABLE] = undecodable_path
+        code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+        assert code == 1, f"non-UTF-8 file: expected exit 1, got {code}"
+        assert PRIVATE_NEEDLES_VARIABLE in output, (
+            f"non-UTF-8 file: message must name the variable, got: {output!r}"
+        )
+
+        for label, text in [("empty", ""), ("comments only", "# only a comment\n\n")]:
+            empty_path = os.path.join(temp_dir, "empty.txt")
+            with open(empty_path, "w", encoding="utf-8") as handle:
+                handle.write(text)
+            os.environ[PRIVATE_NEEDLES_VARIABLE] = empty_path
+            code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+            assert code == 1, f"{label} needle file: expected exit 1, got {code}"
+            assert PRIVATE_NEEDLES_VARIABLE in output and "no needles" in output, (
+                f"{label} needle file: message must name the variable and say "
+                f"it has no needles, got: {output!r}"
+            )
 
         os.environ[PRIVATE_NEEDLES_VARIABLE] = os.path.join(temp_dir, "missing.txt")
         code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
