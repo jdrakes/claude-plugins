@@ -219,8 +219,8 @@ content folder is refused, so no PDF is written into it. `bin/build-variant`
 builds a variant, a copy with entries removed such as a public copy without a
 phone number. It checks the rendered text to prove they are gone.
 
-**`resume-facts`** interviews you about one role, card by card, through
-`AskUserQuestion`, and records what you say in `KNOWLEDGE.md`. It writes
+**`resume-facts`** interviews you about one role, one question at a time, through
+`AskUserQuestion`, with the details always typed in your own words, and records what you say in `KNOWLEDGE.md`. It writes
 only to that file, never to a resume, so a bullet is written from a fact
 rather than invented.
 

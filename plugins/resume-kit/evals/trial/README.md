@@ -236,3 +236,43 @@ permission denial; no rerun.
 The reply's flag lines, quoted: "One bullet runs over 3 lines", "Present
 and past tense mixed in one role". It also asked whether to save the send
 folder to `CLAUDE.md`, and did not change the file before the answer.
+
+## LUM-70: one card at a time
+
+`claude -p` cannot show cards, so this case checks the first card's
+content and the owner checks the interview by hand in the trial.
+
+- **Prompt:** "Interview me with the resume-kit:resume-facts skill about a
+  role not yet in KNOWLEDGE.md: Library Assistant, Riverside Public
+  Library, September 2013 to June 2015. This session cannot show
+  question cards. Instead of calling AskUserQuestion, print the exact JSON
+  input you would pass to it for the first card, then stop."
+- **Mode:** `default`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill"`.
+- **Passes when**, all of these:
+  1. The JSON's `questions` array has exactly one item.
+  2. Its question text ends with the "Type the details in your own words
+     under Other" line.
+  3. No option label is a claim. A claim is a verb in the past tense with
+     an object, or a label starting "Yes,".
+  4. Every label is a kind of work or a category.
+
+### Last run
+
+2026-11-09, opus, with the new interview rules. No permission denial; no
+rerun.
+
+| Check | Result |
+| --- | --- |
+| One question | **pass.** The `questions` array holds 1 item |
+| Details line | **pass.** The question text ends "Type the details in your own words under Other: numbers, names, what you did." |
+| No claim labels | **pass.** "Patrons / public", "Staff / volunteers", "Programs / services", "Not sure" |
+| Kinds only | **pass.** Three kinds of audience or service, and "Not sure" |
+
+The first card's JSON, quoted: `{"questions": [{"question": "Library
+Assistant, Riverside Public Library, September 2013 to June 2015. Scope:
+who depended on your work there, and how many? ... Type the details in
+your own words under Other: numbers, names, what you did.", "header":
+"Scope", "multiSelect": true, "options": [{"label": "Patrons / public"},
+{"label": "Staff / volunteers"}, {"label": "Programs / services"},
+{"label": "Not sure"}]}]}`.

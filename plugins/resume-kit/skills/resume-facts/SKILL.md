@@ -14,11 +14,24 @@ directory.
 If that directory is a git checkout, check `git status -sb` and the branch
 first. Read the section of `KNOWLEDGE.md` whose heading names the role's
 company and dates, and ask nothing it already answers. Then interview the
-user about that role through `AskUserQuestion`, one card of at most four
-questions per call, in this order. Options are categories only (measured,
-not measured, not sure; personal, team, org); a number, a name, a mechanism
-or a date comes only from what they type under Other, so that nothing
-recorded as their words is the model's.
+user about that role through `AskUserQuestion`, one question per call, in
+this order, and wait for each answer before sending the next.
+
+Every card's question ends with this line: "Type the details in your own
+words under Other: numbers, names, what you did." Options are kinds of
+answer, never achievements: a kind of work (a process or system; people,
+such as training, mentoring or leading; money or supplies; schedules or
+logistics) or a category (measured, not measured, not sure; personal,
+team, org). An option someone could pick to claim something with no fact
+behind it, such as "Built a new process" or "Yes, a process", is not an
+option. A number, a name, a mechanism or a date comes only from what they
+type, so nothing recorded as their words is the model's. A picked option
+with nothing typed records only the kind; ask for the details once, in
+plain chat.
+
+If the person answers in chat while a card is open, take that answer as
+the answer to the card's question, say so in one line, and send the next
+question. Never send the same card again.
 
 1. **Scope.** Who and how many depended on the thing: teams, services,
    clients, users. What broke or stopped if it was wrong.
