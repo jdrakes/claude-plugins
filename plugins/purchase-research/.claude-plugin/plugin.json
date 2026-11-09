@@ -1,0 +1,13 @@
+{
+  "name": "purchase-research",
+  "description": "A repeatable method for researching and deciding on purchases: name the real constraint first, compare on 1- and 3-year cost, and log each decision to one file whose frontmatter says its status.",
+  "version": "0.0.0",
+  "author": {
+    "name": "James Drakes"
+  },
+  "keywords": [
+    "purchases",
+    "research",
+    "decisions"
+  ]
+}
