@@ -21,7 +21,7 @@ All paths are relative to the plugin directory.
 | --- | --- |
 | `evals/cover-letter/posting.txt` | An invented posting: Lakeside Freight, Staff Backend Engineer. Backend and data-service work only. It never mentions event sourcing |
 | `evals/cover-letter/letter-good.md` | An application file built from `skills/cover-letter/examples/applications/2026-01-12-base-backend-engineer-cover-letter.md` for that posting. Slots filled, under the bar plus 42, the hook confirmed by Alex in `## Rulings`, `## Confirm before sending` at `None.` |
-| `evals/cover-letter/letter-broken.md` | `letter-good.md` plus one added paragraph carrying two planted defects, and padding that takes the letter more than 100 words over the bar |
+| `evals/cover-letter/letter-broken.md` | The earlier `letter-good.md`, from before its sentences were brought in line with `skills/resume/content-rules.md`, plus one added paragraph carrying two planted defects, and padding that takes the letter more than 100 words over the bar. It still says the search service had no owner, that a retry loop doubled database load, and that the rewrite ended a rota and two engineers took on-call. Those sentences are left in on purpose: the reader may report them as content-rule findings |
 
 The two planted defects in `letter-broken.md`:
 
@@ -36,8 +36,8 @@ The two planted defects in `letter-broken.md`:
 
 | Case | Must report |
 | --- | --- |
-| `letter-good.md` | A Pass 1 verdict. **No** untraceable claim. No author-confirmation item for the hook the rulings already close |
-| `letter-broken.md` | The length as a finding. **Both** planted claims as untraceable; the second also as author-confirmation required |
+| `letter-good.md` | A Pass 1 verdict. **No** untraceable claim. **No** content-rule finding. No author-confirmation item for the hook the rulings already close |
+| `letter-broken.md` | The length as a finding. **Both** planted claims as untraceable; the second also as author-confirmation required. Content-rule findings for the on-call, rota and deficiency wording are allowed and expected |
 
 Both cases must leave settled `## Rulings` items alone. A reader that
 re-asks a confirmed question fails even when its other findings are right.
@@ -89,7 +89,30 @@ From the plugin directory, with `P` set to its absolute path:
 
 ## Last run
 
-2026-11-08, opus, bar 408 (base `2026-01-12-base-backend-engineer-cover-letter.md`).
+Not yet rerun after the content-rule rewrite below.
+
+On 2026-11-08 the reader was run with `defaults:` set to
+`skills/resume/content-rules.md` and the good case failed. It reported
+three content-rule findings and one untraceable claim, all in sentences
+that came from the base letter:
+
+- On-call and maintenance clauses: "two other engineers have since taken
+  on-call for it" and the overnight rota the reconciliation job ended.
+- Past-employer deficiency framing: a retry loop that "had doubled database
+  load since launch", and "a search service nobody owned".
+- Untraceable: "The habit behind both jobs is the same: plan the migration
+  before the schema, ...". No record supports "plan the migration before
+  the schema" or calls anything a habit.
+
+The base and `letter-good.md` were rewritten to say what was built and its
+effect, and the closing sentence now names the two documents the record
+holds (the schema-change checklist, the search runbook and design note).
+Base ruling 2 now records why the rota is left out. The base measures 401,
+so `letter-good.md` at 427 is 26 over, inside the 42-word margin, and
+`letter-broken.md` at 554 is 153 over, more than 100. The broken case was
+not changed.
+
+Earlier run, 2026-11-08, opus, bar 408 (base `2026-01-12-base-backend-engineer-cover-letter.md`), before the reader read the content rules:
 
 After this run the shipped base was fixed so its own claims trace to the
 example record, and it now measures 410. The cases were not rerun against

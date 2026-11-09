@@ -24,23 +24,24 @@ view was dropped when the last caller left. Afterwards I wrote the
 schema-change checklist the team now follows for every change: backfill,
 dual writes, the read switch, and which of the two deploys goes first. I
 also rewrote our nightly reconciliation job as a consumer of the
-change-data-capture stream, which took the run from four hours to under ten
-minutes and ended the overnight rota that existed only to restart it.
+change-data-capture stream, so each change is reconciled as it arrives and
+the nightly run, once four hours long, now checks only what is left in
+under ten minutes.
 
 At Cobalt Harbor I built the billing export every finance tool read from.
 A corrected invoice is reissued as a new record pointing at the one it
 replaces, so history is never edited and finance can see both the
 original and the correction. I added distributed tracing across six
-services and used it to find a client retrying every failed write while
-the server retried too, which had doubled database load since launch. I
-removed the client's retry. I also took over a search service nobody
-owned, halved its p99 latency by removing a full-text scan that a filter
-triggered on every query, and documented it well enough that two other
-engineers have since taken on-call for it.
+services, used the traces to find writes retried by both a client and the
+server, and removed the client's retry so each write is retried in one
+place. I also took on the search service and halved its
+p99 latency by removing a full-text scan that a filter ran on every
+query.
 
-The habit behind both jobs is the same: plan the migration before the
-schema, measure before changing the hot path, and leave the next engineer
-a document they can act on without me.
+In both jobs I left documents other engineers work from: the
+schema-change checklist at Northwind, and at Cobalt Harbor the search
+service's runbook and design note, which let two other engineers take a
+share of the service.
 [COMPANY DETAIL: one specific thing from the posting, in one or two
 sentences, and how the work above meets it.] [HOOK: why Alex is applying
 to this company, in Alex's words.]
@@ -57,9 +58,11 @@ alex.rivera@example.com
 1. **"The work I am proudest of" was cut** (Alex, 2026-01-12). The line
    ranked Alex's own work instead of describing it. The opening states the
    claim and lets the reader rank it.
-2. **"Ended the overnight rota" stays** (Alex, 2026-01-12). `KNOWLEDGE.md`
-   confirms the rota existed only for the reconciliation job, so the claim
-   is the job's effect and not a guess at one.
+2. **The reconciliation sentence says what the rewrite does** (Alex,
+   2026-01-12). `KNOWLEDGE.md` also records that the old job needed
+   someone awake to restart it and that this duty ended. The letter leaves
+   that out: a clause about who was kept up at night spends the sentence
+   on a duty roster instead of on what was built.
 3. **The tenant-isolation rollout is left out** (Alex, 2026-01-12). It is in
    progress, and work in progress is described, not counted. A posting that
    asks for multi-tenant work may earn it one described sentence in the
@@ -76,12 +79,12 @@ alex.rivera@example.com
 | Seventeen callers, none releasing on the same day | Resume: "so the seventeen callers could migrate one at a time rather than in a single coordinated release" |
 | The view kept the name and columns, joined across the services; about five months; view dropped | `KNOWLEDGE.md` "Northwind Systems", Orders table split |
 | Schema-change checklist and its steps | `KNOWLEDGE.md` "Northwind Systems", Schema-change checklist; resume: "covering backfills, dual writes and the order the two deploys must happen in" |
-| Reconciliation, four hours to under ten minutes, rota ended | `KNOWLEDGE.md` "Northwind Systems", Nightly reconciliation; resume: "moved the run from four hours to under ten minutes" |
+| Reconciliation on the change-data-capture stream; each change reconciled as it arrives; four hours to under ten minutes | `KNOWLEDGE.md` "Northwind Systems", Nightly reconciliation; resume: "moved the run from four hours to under ten minutes" |
 | Billing export every finance tool read; reissue without editing history; finance sees both | `KNOWLEDGE.md` "Cobalt Harbor", Billing export; resume: "Built the billing export used by every downstream finance tool" |
-| Tracing across six services; retry loop doubling database load | `KNOWLEDGE.md` "Cobalt Harbor", Tracing; resume: "used it to find a retry loop that had been doubling database load since launch" |
-| Removed the client's retry | `KNOWLEDGE.md` "Cobalt Harbor", Tracing |
-| Plan the migration first, measure first, leave a document | A summary of the checklist, the tracing work and the search runbook, each traced above; it adds no new fact |
-| Search service: unowned, p99 halved, full-text scan, two engineers | `KNOWLEDGE.md` "Cobalt Harbor", Search service; resume: "cut its p99 latency by half by removing an accidental full-text scan" |
+| Tracing across six services; writes retried by both a client and the server | `KNOWLEDGE.md` "Cobalt Harbor", Tracing; resume: "Added distributed tracing across six services" |
+| Removed the client's retry, so each write is retried in one place | `KNOWLEDGE.md` "Cobalt Harbor", Tracing: the server also retried, and Alex removed the client retry |
+| Took on the search service; p99 halved by removing a full-text scan a filter ran on every query | `KNOWLEDGE.md` "Cobalt Harbor", Search service; resume: "cut its p99 latency by half by removing an accidental full-text scan" |
+| Documents other engineers work from: the checklist the team uses; the search runbook and design note, after which two other engineers took a share of the service | `KNOWLEDGE.md` "Northwind Systems", Schema-change checklist; `KNOWLEDGE.md` "Cobalt Harbor", Search service |
 
 Not used on purpose:
 

@@ -60,6 +60,38 @@ class BaseLetterTests(unittest.TestCase):
         self.assertEqual(headings, ["Letter", "Rulings", "Evidence"])
 
 
+EVALS = PLUGIN / "evals" / "cover-letter"
+
+
+def letter_words(path):
+    section, error = build_letter.letter_section(path.read_text(encoding="utf-8"))
+    assert error is None, error
+    return int(build_letter.words_line(section).split(",", 1)[0])
+
+
+class EvalCaseLengthTests(unittest.TestCase):
+    """The letter-reader evals measure each case against the base's length.
+
+    These break if the base is edited outside 400 to 450 words, or a case is
+    edited so that the good case is more than 42 over the base or the broken
+    case is not more than 100 over: the expectations in
+    evals/cover-letter/README.md depend on both.
+    """
+
+    def setUp(self):
+        self.bar = letter_words(BASE)
+
+    def test_the_base_stays_between_400_and_450_words(self):
+        self.assertGreaterEqual(self.bar, 400)
+        self.assertLessEqual(self.bar, 450)
+
+    def test_the_good_case_is_within_the_bar_plus_42(self):
+        self.assertLessEqual(letter_words(EVALS / "letter-good.md") - self.bar, 42)
+
+    def test_the_broken_case_is_more_than_100_over_the_bar(self):
+        self.assertGreater(letter_words(EVALS / "letter-broken.md") - self.bar, 100)
+
+
 class KnowledgeTests(unittest.TestCase):
     def setUp(self):
         text = (EXAMPLES / "KNOWLEDGE.md").read_text(encoding="utf-8")
