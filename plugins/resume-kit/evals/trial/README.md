@@ -129,10 +129,16 @@ yearly supply budget" with no mechanism or outcome.
   5. The draft still parses:
      `python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1]))' "$F/drafts/resume-v1-draft.yaml"`.
      Run this with a python3 that has PyYAML.
+  6. No bullet's first verb, or a verb joined to it by "and", is a
+     third-person form ending in "-s" ("Manages", "and places"). On that
+     entry,
+     `grep -n -E -e '^ *- [A-Za-z]+s ' -e '(,|;) and [a-z]+s '`
+     finds the candidates; read each hit, because a plural noun after
+     "and" also matches. No hit may be a verb.
 
 ### Last run
 
-2026-11-09, opus, with the writer's three new rules. No permission
+2026-11-09, opus, with the writer's verb-form rule. No permission
 denial; no rerun.
 
 | Check | Result |
@@ -142,20 +148,23 @@ denial; no rerun.
 | Time claims | **pass.** The grep printed nothing |
 | Report traces | **pass.** Each of the four bullets names its `KNOWLEDGE.md` lines |
 | Parses | **pass.** `yaml.safe_load` read the draft without error |
+| Verb form | **pass.** The grep printed nothing. Each bullet starts with a bare verb, and no bullet mixes tenses |
 
 The Northgate bullets as written:
 
-- Set up a shared lab-supply order spreadsheet for all six science
-  teachers in fall 2020, and places the department's orders from it each
-  month; late orders went from most units to almost none.
-- Manages the science department's $18,000 yearly supply budget for six
-  teachers.
-- Runs the science department's monthly planning meetings, where the six
-  teachers agree the next month's labs and the rooms they need.
+- Set up a shared lab-supply order spreadsheet for the six-teacher
+  science department in fall 2020; late orders went from most units to
+  almost none.
+- Manage the $18,000 annual supply budget for the science department's
+  six teachers, and place their lab-supply orders from the shared
+  spreadsheet each month.
+- Run monthly planning meetings for the six science teachers, where they
+  agree the next month's labs and which rooms they need.
 - Mentored three first-year teachers, one a year from 2021 to 2023.
 
-The report itself named a mixed tense in bullet 1 ("Set up" with
-"places"). That is LUM-69's check, not this case's.
+The run before the verb-form rule wrote "Manages", "Runs" and "Set up
+... and places" in one bullet. The check's grep finds all three in those
+bullets.
 
 ## LUM-69: basics through a draft
 

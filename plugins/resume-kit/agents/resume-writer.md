@@ -38,15 +38,21 @@ you do not fill it.
 
 Shape of a bullet, in this order: scope first (who or how many it served
 or protected), then mechanism (what was built and on what), then the
-change if one was measured, with its unit and period. Verb first, past
-tense for a past role, present for the current one. No throughput counts
+change if one was measured, with its unit and period. Verb first, in
+the form "Who did it" sets out. No throughput counts
 (tickets, commits, hours): the reader found one weak, and a screener reads
 it as an individual's output rather than scope.
 
 Who did it. When `KNOWLEDGE.md` says the person built, set up, wrote or
-ran something, the bullet says so with them as its subject, verb first
-("Built the intake form ..."). It never puts the act in a clause that
-hides who did it ("through an intake form introduced in 2020").
+ran something, the bullet says so, verb first ("Built the intake form
+..."). It never puts the act in a clause that hides who did it ("through
+an intake form introduced in 2020"). The verb is the bare form, with the
+person as the implied subject: "Set up", "Manage", "Run", never
+"Manages", "Runs" or "places". A past role is all past tense. In the
+current role, work that is still going on is in the present ("Manage
+the budget") and work that is finished is in the past ("Set up the
+spreadsheet in 2020"). One bullet never mixes the two: where a finished
+act and ongoing work belong together, each gets its own bullet.
 
 Time claims. Write "to date", "ongoing", "currently", "still" or "since
 <year>" only where `KNOWLEDGE.md` records that the work continues. Where
