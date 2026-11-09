@@ -50,13 +50,11 @@ found". The message is exactly these lines, nothing else:
     content: <absolute path to the YAML>
     pdf: <absolute path to the built PDF>
     posting: <absolute path, or "none">
-    defaults: <absolute path to resume-kit's skills/resume/content-rules.md>
-    own-rules: <absolute path to the content folder's CLAUDE.md, or "none">
     today: <YYYY-MM-DD>
 
-`defaults:` is `${CLAUDE_PLUGIN_ROOT}/skills/resume/content-rules.md`.
-`own-rules:` is the working directory's `CLAUDE.md` when it has one, else
-"none".
+The screener is not given the content rules. A recruiter does not know
+the writer's rules, and with them the screener read harsher without
+finding a new reason.
 
 ## 3. Relay
 

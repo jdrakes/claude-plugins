@@ -1,11 +1,12 @@
 # Content rules
 
 resume-kit's default rules for what a resume, a cover letter or an
-application answer says. The agents that write or judge content
-(`resume-writer`, `screener`, `letter-reader`) and the `resume` and
-`cover-letter` skills read this file first, then the `## Content rules`
-section of the `CLAUDE.md` in your content folder. A rule there adds to
-these; where it contradicts one of these, it wins.
+application answer says. The `resume-writer` and `letter-reader` agents
+and the `resume` and `cover-letter` skills read this file first, then the
+`## Content rules` section of the `CLAUDE.md` in your content folder. A
+rule there adds to these; where it contradicts one of these, it wins. The
+`screener` reads neither, because a recruiter's cold read does not know
+the writer's rules.
 
 ## Sources
 

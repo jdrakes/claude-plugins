@@ -1,10 +1,12 @@
-"""Tests that each skill hands its agent the content rules.
+"""Tests that each skill hands its agent the content rules, except the screener.
 
 The defaults live in one file, skills/resume/content-rules.md. Each agent
-that writes or judges content gets its path in the dispatch as `defaults:`,
-and the content folder's CLAUDE.md as `own-rules:`. These break if a skill
-and its agent disagree on the dispatch block, the two keys are dropped or
-moved, or a skill points at a rules file that is not there.
+that writes content or checks a letter gets its path in the dispatch as
+`defaults:`, and the content folder's CLAUDE.md as `own-rules:`. The
+screener gets neither: it reads the page cold, as a recruiter who does not
+know the writer's rules. These break if a skill and its agent disagree on
+the dispatch block, the two keys are dropped or moved, a skill points at a
+rules file that is not there, or the rules are handed to the screener.
 """
 import re
 import unittest
@@ -15,10 +17,12 @@ RULES = PLUGIN / "skills" / "resume" / "content-rules.md"
 RULES_PATH = re.compile(
     r"\$\{(CLAUDE_PLUGIN_ROOT|CLAUDE_SKILL_DIR)\}(/[^\s\"'`]*content-rules\.md)"
 )
+SCREENER = ("skills/resume-review/SKILL.md", "agents/screener.md")
+RULES_KEY = re.compile(r"\b(defaults|own-rules):")
 PAIRS = [
     ("skills/resume-review/SKILL.md", "agents/screener.md",
      "    content: <absolute path to the YAML>",
-     ["content", "pdf", "posting", "defaults", "own-rules", "today"]),
+     ["content", "pdf", "posting", "today"]),
     ("skills/resume/SKILL.md", "agents/resume-writer.md",
      "    draft: <absolute path to the draft YAML>",
      ["draft", "role", "facts", "defaults", "own-rules"]),
@@ -60,8 +64,28 @@ class RulesDispatchTests(unittest.TestCase):
                 block = dispatch_block(read(skill), first_line)
                 self.assertEqual([line.strip().split(":", 1)[0] for line in block], keys)
 
+    def test_the_screener_is_not_given_the_rules(self):
+        for relative in SCREENER:
+            with self.subTest(file=relative):
+                text = read(relative)
+                self.assertEqual(RULES_KEY.findall(text), [])
+                self.assertEqual(RULES_PATH.findall(text), [])
+
+    def test_each_rules_reader_names_both_keys(self):
+        for skill, agent, _, _ in PAIRS:
+            if (skill, agent) == SCREENER:
+                continue
+            for relative in (skill, agent):
+                with self.subTest(file=relative):
+                    self.assertEqual(
+                        sorted(set(RULES_KEY.findall(read(relative)))),
+                        ["defaults", "own-rules"],
+                    )
+
     def test_each_skill_names_the_rules_file_that_exists(self):
-        for skill, _, _, _ in PAIRS:
+        for skill, agent, _, _ in PAIRS:
+            if (skill, agent) == SCREENER:
+                continue
             with self.subTest(skill=skill):
                 found = RULES_PATH.findall(read(skill))
                 self.assertNotEqual(found, [])

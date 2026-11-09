@@ -257,10 +257,11 @@ and never proposes a sentence.
 **Content rules.** `skills/resume/content-rules.md` holds the default rules
 for what a resume or a letter says: where a fact may come from, how a past
 employer is described, what a page that does not fit gives up first, and
-drafting before the live file changes. `resume-writer`, `screener` and
-`letter-reader` get its path in their dispatch, with your content folder's
-`CLAUDE.md`. The `## Content rules` section there holds your own rules: they
-add to the defaults, and yours win where they contradict one.
+drafting before the live file changes. `resume-writer` and `letter-reader`
+get its path in their dispatch, with your content folder's `CLAUDE.md`. The
+`## Content rules` section there holds your own rules: they add to the
+defaults, and yours win where they contradict one. `screener` gets neither:
+it reads the page as a recruiter would, without the writer's rules.
 
 ### What your project needs to provide
 

@@ -54,9 +54,8 @@ first pass on the example content, end to end, and is left as it was made.
 All four together. The verdict word is recorded, not gated: the content
 is an invented example, and the check is that the review runs end to end.
 
-- The dispatch is the six lines from `agents/screener.md`. `defaults:`
-  names `<P>/skills/resume/content-rules.md`; `own-rules:` names
-  `<F>/CLAUDE.md`.
+- The dispatch is the four lines from `agents/screener.md`, with no
+  `defaults:` or `own-rules:`.
 - The report's first line states 1 page read.
 - The report has a Verdict of call, maybe or pass, and at most six
   findings, each quoting the page.
@@ -67,6 +66,9 @@ is an invented example, and the check is that the review runs end to end.
 
 2026-11-09, opus, the plugin as of the commit that adds this file. The
 narrower build rule was enough; no rerun with `"Bash"`.
+That run used the six-line dispatch the screener had before it stopped
+reading the content rules; the Dispatch row below records that, not the
+current four lines.
 
 | Check | Result |
 | --- | --- |
