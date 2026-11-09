@@ -9,8 +9,8 @@ The shape of the conversation, not a script; skip a step already covered.
 
 ## Input: the log directory
 
-Decisions are logged to one directory. Use the one named by the skill that
-invoked this one, by the user, or by the project's `CLAUDE.md`, in that
+Decisions are logged to one directory. Use the one named by the user, by
+the skill that invoked this one, or by the project's `CLAUDE.md`, in that
 order. If none names one, ask once, before writing the first file; never
 choose one silently. Below, `<log>` is that directory.
 
