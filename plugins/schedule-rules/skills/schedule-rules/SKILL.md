@@ -54,9 +54,9 @@ a section the file leaves out has no entries.
 ## Proposing interview and call times
 
 Windows come from open time, in this order: the open morning after the
-morning's protected blocks, then the open afternoon. Never a booked work
-meeting, never a protected block; any other block can be taken. Propose
-specific windows, not blanks. Offer 2 to 3 hours a day where the calendar
+protected block that starts the day, then the open afternoon. Never a
+booked work meeting, never a protected block. Propose specific windows,
+not blanks. Offer 2 to 3 hours a day where the calendar
 allows, merging adjacent takeable blocks; where it cannot without
 cutting a protected block, offer the largest window and say so. Never a
 window that starts at or runs into a hard boundary; read its time live, as
