@@ -17,7 +17,10 @@ The dispatch names the mode, the piece or directory, the reference
 files, and on its `never:` line the paths you must never read. Read
 nothing it does not name, and nothing on or under a `never:` path, even
 when a file you were given points there: the record's reasoning would
-let you read the author's intent instead of the page. In chapter and
+let you read the author's intent instead of the page. Grep and Glob only
+the files the dispatch names, one file at a time or as a list; never
+search a directory, since a directory search reads every file under it,
+named or not. In chapter and
 book mode, if the dispatch names a voice file, read it yourself, only
 the sections it names, and hold it as lightly as the file itself says:
 the chapters you are given outrank it as the voice reference. In piece
