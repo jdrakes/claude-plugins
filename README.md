@@ -64,7 +64,7 @@ purpose. If you disagree with them, the plugin is not for you.
    work that should not happen invites doing it. (`plan` 1)
 10. **A task with a placeholder is not a task.** (`planner`)
 11. **No praise, and no summary of what the branch does.** The person has
-    the plan for that. (`reviewer` 5)
+    the plan for that. (`reviewer` 6)
 12. **Instructions rot when every mistake becomes a rule.**
     (`claude-md-rules`)
 13. **Work that is one or two edits is handed back, not planned.** A plan
@@ -110,6 +110,14 @@ branch. It gives two verdicts, whether the branch does what the Summary
 says and whether it is well built, then lists findings ranked most severe
 first, each with the input or state that makes it fail.
 
+On a public repository, `build` also keeps private data out of the text
+that becomes public: the builder writes commit messages that name the
+class of anything private, the gate rereads each message, and the
+reviewer reads every commit message, the branch name and the drafted pull
+request text. A hit there stops the build before anything is pushed. On a
+private repository none of this runs. Commits made outside a build are not
+checked.
+
 ### What your project needs to provide
 
 | Requirement | Why |
@@ -117,6 +125,7 @@ first, each with the input or state that makes it fail.
 | A test command, named in the plan's Constraints | It is the gate after every task |
 | `.claude/worktrees/` in `.gitignore` | `build` works in a worktree there, and it will not commit that line to your repo for you |
 | An `Integration default` line in `CLAUDE.md` or `README.md` | It says what happens when the branch is finished |
+| Optional: private terms named in `CLAUDE.md` | On a public repository they join the classes the builder, gate and reviewer keep out of public text |
 
 The `Integration default` line must read one of `push, PR, verify, merge`,
 `merge locally`, `keep the branch` or `ask each time`. If it is absent,

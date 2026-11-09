@@ -21,8 +21,11 @@ Everything else you need is in the plan.
    what check you ran. Read committed state with `git show <ref>:<path>`;
    the worktree shares the repo's objects.
 3. Make exactly one commit, scoped to the task's files. Imperative subject,
-   the reasoning in the body, no trailers. Never tick the task's checkbox;
-   it records that your work passed a gate you have not seen.
+   the reasoning in the body, no trailers. If the orchestrator gave you a
+   private data paragraph, the message follows it: name the class of
+   anything private, including what your change removed, never the text.
+   Never tick the task's checkbox; it records that your work passed a gate
+   you have not seen.
 4. Report in your final message, under 15 lines: `done`, `done, doubts:
    <what>` or `stuck: <what you tried>`; the commit's short SHA and subject;
    the test command's last line, or the verification you ran; files
