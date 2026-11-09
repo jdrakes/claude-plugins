@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Build a cover letter PDF from an application file.
+
+An application file is markdown: a header, then a `## Letter` section, then
+the rulings, gap table and evidence behind the letter. Only the `## Letter`
+section reaches the page.
+
+No rendered PDF is written into the content folder, which is usually a
+repository: a review build goes to the temp folder, and the send-ready copy
+goes where -o says.
+
+Usage:
+  build-letter <application.md>              review build, <temp>/<stem>.pdf
+  build-letter <application.md> -o <folder>/ "<Name> Cover Letter.pdf" in <folder>
+  build-letter <application.md> -o <out.pdf> PDF at <out.pdf>
+  build-letter --words <application.md>      "<total>, by paragraph <n>/<n>/..."
+  build-letter --extract <application.md>    the `## Letter` section as text
+"""
+import json
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+SKILL_DIR = Path(__file__).resolve().parent.parent
+TEMPLATE = SKILL_DIR / "template.typ"
+FONTS = SKILL_DIR.parent / "resume" / "fonts"
+PHONE = re.compile(r"[\d\-()+.]{7,}")
+
+
+def letter_section(text):
+    """The `## Letter` section, as (section, error).
+
+    It stops at the next `## ` heading of any kind, not at a named list: a
+    heading the list did not name would otherwise pull the rest of the file
+    onto the page. A file with no `## Letter` heading is an error rather
+    than an empty letter, because an empty letter renders a blank page and
+    clears every length check.
+    """
+    match = re.search(r"^## Letter$\n(.*?)(?=^## |\Z)", text, re.S | re.M)
+    if match is None:
+        return None, "no '## Letter' heading"
+    return match.group(1).strip(), None
+
+
+def paragraphs(section):
+    """Blank-line-separated blocks, each joined onto one line.
+
+    The markdown is wrapped for reading in a terminal; the page must not
+    inherit those breaks.
+    """
+    return [re.sub(r"\s+", " ", block).strip()
+            for block in re.split(r"\n\s*\n", section) if block.strip()]
+
+
+def letter_payload(section):
+    """What template.typ reads, as (payload, error).
+
+    The last block is the name followed by contact details, one per line.
+    A contact detail is a word holding an @ or shaped like a phone number;
+    the rest of the block is the name. The template hoists them into a
+    letterhead and repeats the name as the sign-off.
+    """
+    blocks = paragraphs(section)
+    tail = blocks[-1].split() if blocks else []
+    contact = [word for word in tail if "@" in word or PHONE.fullmatch(word)]
+    if not contact:
+        return None, "no email or phone in the letter's last block"
+    name = " ".join(word for word in tail if word not in contact)
+    return {"name": name, "contact": contact, "body": blocks[:-1]}, None
+
+
+def words_line(section):
+    """`<total>, by paragraph <n>/<n>/...`, the reader dispatch's `words:` value.
+
+    Every block counts, the greeting and the signature included, so the
+    total is what `wc -w` gives for the section.
+    """
+    counts = [len(block.split()) for block in paragraphs(section)]
+    return f"{sum(counts)}, by paragraph {'/'.join(str(count) for count in counts)}"
+
+
+def output_path(source, output_arg, name):
+    """Where the PDF goes.
+
+    No -o: the temp folder, so a review build never lands beside the
+    application file. -o naming a folder (an existing directory, or a path
+    ending in /): `<name> Cover Letter.pdf` inside it, the send-ready name.
+    Anything else is the file path itself.
+    """
+    if output_arg is None:
+        return Path(tempfile.gettempdir()) / f"{source.stem}.pdf"
+    if output_arg.endswith("/") or Path(output_arg).is_dir():
+        return Path(output_arg).resolve() / f"{name} Cover Letter.pdf"
+    return Path(output_arg).resolve()
+
+
+def render(payload, output):
+    """Compile the template to output. A typst failure is unrecoverable I/O."""
+    with tempfile.TemporaryDirectory() as work:
+        content = Path(work) / "letter.json"
+        content.write_text(json.dumps(payload), encoding="utf-8")
+        subprocess.run(
+            ["typst", "compile", "--root", "/", "--ignore-system-fonts",
+             "--font-path", str(FONTS), "--input", f"content={content}",
+             str(TEMPLATE), str(output)],
+            check=True,
+        )
+
+
+def main(argv):
+    if len(argv) == 2 and argv[0] in ("--words", "--extract"):
+        mode, source, output_arg = argv[0], Path(argv[1]).resolve(), None
+    elif len(argv) == 1:
+        mode, source, output_arg = "render", Path(argv[0]).resolve(), None
+    elif len(argv) == 3 and argv[1] == "-o":
+        mode, source, output_arg = "render", Path(argv[0]).resolve(), argv[2]
+    else:
+        print(__doc__, file=sys.stderr)
+        return 2
+    if not source.is_file():
+        print(f"application file not found: {source}", file=sys.stderr)
+        return 1
+    section, error = letter_section(source.read_text(encoding="utf-8"))
+    if error:
+        print(f"{error} in {source}", file=sys.stderr)
+        return 1
+    if mode == "--words":
+        print(words_line(section))
+        return 0
+    if mode == "--extract":
+        print(section)
+        return 0
+    payload, error = letter_payload(section)
+    if error:
+        print(f"{error} in {source}", file=sys.stderr)
+        return 1
+    output = output_path(source, output_arg, payload["name"])
+    output.parent.mkdir(parents=True, exist_ok=True)
+    render(payload, output)
+    print(f"built {output}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
