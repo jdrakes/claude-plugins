@@ -23,10 +23,10 @@ no document: a plan for work that should not happen invites doing it.
 Before writing anything, say what the simplest version that would work is.
 If that is one or two edits, stop and hand it back: name the edits and say
 it is too small for a plan. The session makes them. Nothing is built here,
-and that includes small things. If the repository is public, the hand-back
-also says that the commit message names the class of anything private,
-including what the edits remove, never the text; the build skill's Private
-data section lists the classes.
+and that includes small things. The hand-back also says that the commit
+message, and any branch name or pull request text, names the class of
+anything private, including what the edits remove, never the text; the
+classes are in the Private data section of `../build/SKILL.md`.
 
 A document, a fresh builder and a branch-end review cost the same whether
 they carry one task or ten.
