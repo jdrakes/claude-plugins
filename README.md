@@ -214,7 +214,9 @@ Dispatches `resume-kit:resume-writer` to draft a role's section from facts
 in `KNOWLEDGE.md`, then `resume-kit:resume-review` on the result. A review
 build with no `-o` goes to the temp folder; a send-ready copy goes to a folder
 you name with `-o <folder>/`, as `<Name> Resume.pdf`, and an `-o` inside your
-content folder is refused, so no PDF is written into it.
+content folder is refused, so no PDF is written into it. `bin/build-variant`
+builds a variant, a copy with entries removed such as a public copy without a
+phone number. It checks the rendered text to prove they are gone.
 
 **`resume-facts`** interviews you about one role, card by card, through
 `AskUserQuestion`, and records what you say in `KNOWLEDGE.md`. It writes
@@ -281,6 +283,7 @@ fixed path.
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
 | `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
+| An optional `variants/` folder | Each file there is a variant of a content file in the folder above; the example is `skills/resume/examples/variants/public.yaml` |
 | An optional `CLAUDE.md` in the content folder | Its `## Content rules` section adds to resume-kit's default content rules and wins where it contradicts one. `cover-letter` also reads the live resume's file name, any writing-style skill to invoke and the send folder from it |
 
 A posting is optional and always supplied as a file you name: `resume-review`
@@ -289,7 +292,7 @@ line from a market file for its gap list. Neither fetches a posting itself.
 
 Toolchain: **typst** (the snapshot baseline in `resume` was generated on
 0.15.1 and verified on 0.14.2, 0.15.0 and 0.15.1), `pdftotext` from
-poppler, and `python3` with `pyyaml`.
+poppler (required for `build-variant`, which fails without it), and `python3` with `pyyaml`.
 
 ### The renderer
 
