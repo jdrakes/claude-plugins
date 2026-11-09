@@ -326,8 +326,9 @@ you.
 3. **Total cost over 1 and 3 years**, with real prices and replacement
    cycles, not sticker price. (`purchase-research` step 3)
 4. **One file per decision**, created at the first real constraint and
-   reused, with the reasoning committed alongside each change.
-   (`purchase-research` step 9)
+   reused. When the log directory is inside a git repository, each change
+   is committed with the reasoning in the commit message; otherwise the
+   file is written and not committed. (`purchase-research` step 9)
 5. **Status is read from which frontmatter fields are present** (`hold`,
    `decided`, `bought`, `reassess`); a field with no value is omitted,
    never `null`. (`purchase-research` The log file)
