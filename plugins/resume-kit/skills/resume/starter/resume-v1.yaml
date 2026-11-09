@@ -54,7 +54,7 @@ experience:
     end:                              # blank: current role
     bullets:
       - Built the order service that 40 internal teams call to place and
-        track orders, replacing three copies of the same logic.
+        track orders, so a new team ships its first order in a day.
       - Moved invoice generation from a nightly batch to an event queue, so
         a customer's invoice arrives within a minute of the order.
 
