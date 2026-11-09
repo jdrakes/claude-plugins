@@ -1,10 +1,11 @@
 # claude-plugins
 
-A marketplace of four plugins: `plan-build`, an agent workflow for
+A marketplace of five plugins: `plan-build`, an agent workflow for
 planning and building software changes, `resume-kit`, an opinionated
 resume toolkit, `purchase-research`, a method for researching a purchase
-and logging each decision, and `design-review`, design judgment for an
-existing UI.
+and logging each decision, `design-review`, design judgment for an
+existing UI, and `schedule-rules`, calendar judgment from a rules file
+you write.
 
 ## Install
 
@@ -14,6 +15,7 @@ existing UI.
 /plugin install resume-kit@jdrakes
 /plugin install purchase-research@jdrakes
 /plugin install design-review@jdrakes
+/plugin install schedule-rules@jdrakes
 ```
 
 The old `jdrakes/claude-plan-build` URL still resolves, through GitHub's
@@ -446,3 +448,56 @@ names the taste file and invokes `design-review:design-review` covers only
 the skill: a direct dispatch of the `design-review:design-review` agent
 never sees it and falls back to the default taste. When you dispatch the
 agent, name the taste file in the task, or wrap the agent too.
+
+## schedule-rules
+
+Calendar judgment from a rules file you write: a skill that reads the live
+calendar before any change, proposes interview and call windows, applies
+your contingencies, and runs a daily briefing and a monthly drift review.
+
+### The opinions
+
+These are the argument. If you disagree with them, the plugin is not for
+you.
+
+1. **The live calendar outranks the rules file.** When they disagree,
+   trust the calendar and flag the mismatch. (`schedule-rules` opening)
+2. **Read today's actual calendar before any change**; block times move
+   often. (Before any calendar change, step 1)
+3. **Merge back-to-back blocks that share a title, and count real
+   transition time**: a transition shorter than your minimum buffer is
+   flagged. (Before any calendar change, steps 2 and 3)
+4. **Interview windows come from open time, never protected blocks.**
+   Propose specific windows, 2 to 3 hours a day where the calendar allows,
+   not blanks. (Proposing interview and call times)
+5. **The drift review describes what the calendar shows**; it never infers
+   illness, mood or motivation. (Monthly drift review)
+6. **A mismatch between a goal and the calendar is a question**: change
+   the goal, or change the calendar. The skill changes neither. (Monthly
+   drift review)
+7. **Contingencies are rules written down ahead of time**, in your rules
+   file, and applied as written. (Contingencies)
+
+### What is in it
+
+**`schedule-rules`** (`schedule-rules:schedule-rules`) reads your rules
+file in full, then works from the live calendar: before any change it
+merges same-titled back-to-back blocks and checks transition time; it
+proposes interview and call windows from open time; it applies your
+contingencies; and it runs a daily briefing and a monthly drift review,
+which compares the month against your cadences and, if you name one, your
+goals file. `skills/schedule-rules/examples/rules.md` is a rules file for
+an invented person, with protected blocks, hard boundaries, contingencies
+and a minimum buffer.
+
+### What your project needs to provide
+
+| Requirement | Why |
+|---|---|
+| A calendar connector that can read your calendars, and write them for any change | Every rule is checked against the live calendar; without one the skill says so and stops |
+| A rules file, named by you, by a skill of your own that invokes this one, or by your project's `CLAUDE.md` | It holds every schedule fact; the skill holds none. The sections the skill reads by name are listed in its "What the rules file holds" |
+| Optional: a goals file, named the same way | The monthly drift review puts each goal the calendar can show against the month; with none named, that part is skipped |
+| Optional: an email connector | The daily briefing adds urgent or unreplied email |
+
+To fix the rules file and the goals file once, write a small skill of your
+own whose body names both and invokes `schedule-rules:schedule-rules`.
