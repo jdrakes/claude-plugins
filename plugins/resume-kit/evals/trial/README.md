@@ -92,3 +92,67 @@ bullets about a spreadsheet, a budget and meetings; eleven years under
 one title with three bullets; the camp date line "JUN 2017 - AUG 2022"
 read as a second full-time job; "Manage the science department's $18,000
 yearly supply budget" with no mechanism or outcome.
+
+## LUM-68: the writer keeps stated results and who did the work
+
+- **Setup**, after "How to run" step 2:
+
+  ```sh
+  cp "<P>/evals/trial/writer-draft.yaml" "$F/drafts/resume-v1-draft.yaml"
+  ```
+
+  `writer-draft.yaml` is `folder/resume-v1.yaml` with one change: the
+  Northgate entry's bullets are `bullets: []`.
+- **Prompt:** "Make exactly one Agent call with `subagent_type:
+  resume-kit:resume-writer` and the five lines below as its whole
+  message, then print the agent's report verbatim and nothing else."
+  Follow it with these lines, with `$F` and `<P>` written out:
+
+  ```
+  draft: $F/drafts/resume-v1-draft.yaml
+  role: Science Teacher, Northgate Middle School, AUG 2015 to Present
+  facts: Northgate Middle School, Science Teacher (August 2015 to Present)
+  defaults: <P>/skills/resume/content-rules.md
+  own-rules: $F/CLAUDE.md
+  ```
+
+- **Mode:** `acceptEdits`.
+- **Tools:** `"Agent" "Read" "Glob" "Grep" "Edit"`.
+- **Passes when.** Read the Northgate entry with
+  `sed -n '/company: Northgate/,/company: Maple/p' "$F/drafts/resume-v1-draft.yaml"`.
+  All of these must hold:
+  1. A bullet contains "almost none".
+  2. The spreadsheet bullet starts with "Set up" or "Built".
+  3. `grep -i -E 'to date|ongoing|currently|still|since'` on that entry
+     prints nothing.
+  4. The report names a `KNOWLEDGE.md` line for every bullet.
+  5. The draft still parses:
+     `python3 -c 'import sys, yaml; yaml.safe_load(open(sys.argv[1]))' "$F/drafts/resume-v1-draft.yaml"`.
+     Run this with a python3 that has PyYAML.
+
+### Last run
+
+2026-11-09, opus, with the writer's three new rules. No permission
+denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| Stated result | **pass.** Bullet 1 ends "late orders went from most units to almost none" |
+| Who did it | **pass.** Bullet 1 starts "Set up a shared lab-supply order spreadsheet" |
+| Time claims | **pass.** The grep printed nothing |
+| Report traces | **pass.** Each of the four bullets names its `KNOWLEDGE.md` lines |
+| Parses | **pass.** `yaml.safe_load` read the draft without error |
+
+The Northgate bullets as written:
+
+- Set up a shared lab-supply order spreadsheet for all six science
+  teachers in fall 2020, and places the department's orders from it each
+  month; late orders went from most units to almost none.
+- Manages the science department's $18,000 yearly supply budget for six
+  teachers.
+- Runs the science department's monthly planning meetings, where the six
+  teachers agree the next month's labs and the rooms they need.
+- Mentored three first-year teachers, one a year from 2021 to 2023.
+
+The report itself named a mixed tense in bullet 1 ("Set up" with
+"places"). That is LUM-69's check, not this case's.
