@@ -38,6 +38,13 @@
       "author": { "name": "James Drakes" },
       "category": "productivity",
       "source": "./plugins/schedule-rules"
+    },
+    {
+      "name": "cold-reader",
+      "description": "A cold reader for your own writing: a skill and a read-only agent that read one chapter, one piece or a whole book against only the files you name, and report ranked findings under hard ceilings, verdict first, never a suggested sentence.",
+      "author": { "name": "James Drakes" },
+      "category": "productivity",
+      "source": "./plugins/cold-reader"
     }
   ]
 }
