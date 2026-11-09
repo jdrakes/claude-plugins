@@ -60,8 +60,12 @@ not blanks. Offer 2 to 3 hours a day where the calendar
 allows, merging adjacent takeable blocks; where it cannot without
 cutting a protected block, offer the largest window and say so. Never a
 window that starts at or runs into a hard boundary; read its time live, as
-the rules file says. Say which blocks each window would displace; the user
-approves before anything is sent.
+the rules file says. The minimum buffer is a flag on a window, not a
+reason to drop it; never return no windows. When no window clears the
+buffer, offer the largest takeable windows anyway and name the buffer each
+one breaks. Protected blocks, hard boundaries and booked work meetings
+still exclude a window. Say which blocks each window would displace; the
+user approves before anything is sent.
 
 ## Contingencies
 
