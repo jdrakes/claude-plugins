@@ -1,0 +1,37 @@
+Lakeside Freight: Staff Backend Engineer
+
+Team: Shipment Platform
+Location: Remote (United States)
+Compensation: $190,000 to $225,000 base
+
+An invented posting for the cover-letter eval. The company, the role and
+every detail below are made up.
+
+About the role
+
+Lakeside Freight moves loads for about four hundred regional carriers. Every
+carrier integration, the dispatch board and the billing system read from one
+shipment-tracking database. This year we are splitting that database into
+separate services, and no carrier can be asked to switch on the same day as
+every other. You will lead that migration and own the services that come out
+of it.
+
+What you will do
+
+- Lead the split of the shipment-tracking database into services, with a
+  migration path that lets each carrier integration move on its own schedule.
+- Own the correctness of the invoicing data that carriers and our finance
+  team reconcile against, including how a corrected invoice is recorded.
+- Design service APIs that stay correct when a carrier's system is slow,
+  retries, or goes down.
+- Run PostgreSQL at scale: schema changes, backfills, and query performance
+  on tables that never stop taking writes.
+- Instrument the services so the on-call engineer can see what failed and
+  why without paging the author.
+- Mentor engineers on the team and write design notes others can act on.
+
+What we are looking for
+
+- Eight or more years building backend services that other teams depend on.
+- A migration you have led where callers moved without a coordinated release.
+- Comfort owning a service end to end, from the schema to the dashboard.
