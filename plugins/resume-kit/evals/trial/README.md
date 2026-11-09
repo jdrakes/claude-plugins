@@ -276,3 +276,76 @@ your own words under Other: numbers, names, what you did.", "header":
 "Scope", "multiSelect": true, "options": [{"label": "Patrons / public"},
 {"label": "Staff / volunteers"}, {"label": "Programs / services"},
 {"label": "Not sure"}]}]}`.
+
+## LUM-66: a first letter creates the base
+
+The fixture folder has no `applications/` and so no base letter. The
+posting is `posting.txt`; its organisation, Columbus Youth Arts Alliance,
+is invented.
+
+- **Run 1 prompt:** "Write a cover letter for this posting:" then a blank
+  line, then the contents of `<P>/evals/trial/posting.txt`:
+
+  ```sh
+  { printf 'Write a cover letter for this posting:\n\n'; cat "<P>/evals/trial/posting.txt"; } |
+    claude -p --plugin-dir "<P>" --model opus --permission-mode acceptEdits \
+      --allowedTools <the tools below> > "$(dirname "$F")/reply-1.txt"
+  ```
+
+- **Run 2:** from `$F`, `claude -p -c` with the same flags and this
+  prompt: "Hook, in my words: I keep a department of six teachers
+  supplied and on schedule, and I want to do that for twelve sites of
+  arts programs. Yes, the base is approved." Save the output to
+  `reply-2.txt`.
+- **Mode:** `acceptEdits`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill" "Agent" "Write" "Edit" "Bash(mkdir:*)" "Bash(<P>/skills/cover-letter/bin/build-letter:*)"`.
+- **Passes when**, all of these:
+  1. `reply-1.txt` has no "can't write this letter yet" and no "cannot
+     write".
+  2. `reply-1.txt` asks the hook, asks approval in one line, and shows a
+     drafted letter.
+  3. After run 1, no `*-cover-letter.md` exists under `$F/applications`.
+  4. After run 2, `$F/applications` holds one
+     `*-base-*-cover-letter.md`, with an `Approved:` line and neither
+     "DRAFT" nor "awaiting approval". Match "DRAFT" by case: the
+     example's header line `- Drafted: <date>` is part of the shape, not
+     a status.
+  5. After run 2, `$F/applications` also holds one letter for Columbus
+     Youth Arts Alliance. Its `## Letter` contains the hook in Dana's
+     words, and it has an `## Evidence` section.
+  6. `reply-2.txt` reports the cold read's result. That is the sign
+     letter-reader ran.
+
+### Last run
+
+2026-11-09, opus, with the new "No base found" step. No permission
+denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| Never "cannot" | **pass.** Neither phrase is in `reply-1.txt` |
+| One message | **pass.** The hook question, then "Is this your base letter? Say yes, or tell me what to change.", then the drafted `## Letter` with `[COMPANY]`, `[ROLE]`, `[COMPANY DETAIL]` and `[HOOK]` slots |
+| Nothing before approval | **pass.** After run 1, `$F/applications` did not exist |
+| Approved base | **pass.** `2026-11-09-base-operations-coordinator-cover-letter.md` has "- Approved: Dana Whitfield, 2026-11-09"; no "DRAFT" and no "awaiting approval" |
+| The letter | **pass.** `2026-11-09-columbus-youth-arts-alliance-operations-coordinator-cover-letter.md`; its `## Letter` ends paragraph 3 with the hook word for word, and it has `## Evidence` |
+| Cold read | **pass.** "Its verdict was "Maybe": the facts are concrete and match the job, but the hook says what you want rather than showing you can do it." |
+
+The first 10 lines of `reply-1.txt`, quoted:
+
+```
+Dana, why do you want this operations role? One or two sentences in your own words.
+
+Is this your base letter? Say yes, or tell me what to change.
+
+## Letter
+
+Dear [COMPANY] hiring team,
+
+I am applying for the [ROLE] role. In fall 2020 I set up a shared spreadsheet where all six science teachers at Northgate Middle School request lab supplies, and I have placed the department's orders from it every month since. I also manage the department's supply budget of $18,000 a year.
+
+```
+
+Run 2 also wrote the hook to `KNOWLEDGE.md`, asked its open questions
+one at a time, and asked for a send folder before a send build. Its
+reply ran long, with tables of files and findings; reply length is
+LUM-71's check, not this case's.

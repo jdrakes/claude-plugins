@@ -237,7 +237,8 @@ inventing a gap list.
 
 **`cover-letter`** (`resume-kit:cover-letter`) takes a posting. It audits the
 application form first, picks a base letter from
-`applications/*-base-*-cover-letter.md`, drafts from `KNOWLEDGE.md` and the
+`applications/*-base-*-cover-letter.md`, or, for a first letter, drafts one
+from `KNOWLEDGE.md` and asks you to approve it, drafts from `KNOWLEDGE.md` and the
 live resume only, measures the draft against the base's own length,
 dispatches `resume-kit:letter-reader`, and renders the `## Letter` section
 alone to PDF with the resume's fonts. A review build goes to the temp
@@ -283,7 +284,7 @@ fixed path.
 | A content YAML | The source of what the resume says; the skill never reads the PDF for this |
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
-| `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
+| `applications/`, made by `cover-letter` | Where `cover-letter` keeps base letters, named `*-base-*-cover-letter.md`, and each application file. A first letter drafts a base from `KNOWLEDGE.md` and waits for your approval before writing either |
 | An optional `variants/` folder | Each file there is a variant of a content file in the folder above; the example is `skills/resume/examples/variants/public.yaml` |
 | An optional `CLAUDE.md` in the content folder | Its `## Content rules` section adds to resume-kit's default content rules and wins where it contradicts one. `cover-letter` also reads the live resume's file name, any writing-style skill to invoke and the send folder from it |
 

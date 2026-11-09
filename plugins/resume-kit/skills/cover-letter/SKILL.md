@@ -9,7 +9,8 @@ One letter, one application file, one cold read. This skill writes the
 file itself; a new file under `applications/` is a visible and reversible
 write, so there is no pause and no approval gate before it lands. What it
 never does without the user is decide the content of the letter itself: a
-hook, a motivation, or an AI-usage attestation ruling is always theirs.
+hook, a motivation, a first base letter, or an AI-usage attestation ruling
+is always theirs.
 
 The cold read runs in the `resume-kit:letter-reader` agent
 (`${CLAUDE_PLUGIN_ROOT}/agents/letter-reader.md`), for the reason
@@ -116,10 +117,29 @@ State which base was chosen and why in the new file's header. When the
 chosen shape contradicts the argument the live resume makes, state that
 too, as a positioning conflict (step 10).
 
-**No base found.** Say so, point the user at
-`${CLAUDE_PLUGIN_ROOT}/skills/cover-letter/examples/applications/2026-01-12-base-backend-engineer-cover-letter.md`
-as the shape to copy, and stop. A first letter drafted with no base has no
-bar to hold and no approved register to match.
+**No base found.** A first letter makes the base first. Never say the
+letter cannot be written. Send one message, in this order:
+
+1. The hook question, in one short line: why they want this role, in a
+   sentence or two of their own words.
+2. One line asking for approval: "Is this your base letter? Say yes, or
+   tell me what to change."
+3. The drafted base's `## Letter` section, below both questions.
+
+Nothing else goes in that message: no account of bases, slots,
+rulings or evidence. Draft the base from `KNOWLEDGE.md` and the live
+resume only, in the shape of
+`${CLAUDE_PLUGIN_ROOT}/skills/cover-letter/examples/applications/2026-01-12-base-backend-engineer-cover-letter.md`:
+its header lines, a `## Letter` with `[COMPANY]`, `[ROLE]`,
+`[COMPANY DETAIL]` and `[HOOK]` slots, `## Rulings` and `## Evidence`.
+Read that example for its shape only and never name it to the person.
+
+Write the base to `applications/<YYYY-MM-DD>-base-<shape>-cover-letter.md`
+only once they approve, with the header line
+`- Approved: <their name>, <YYYY-MM-DD>` and each change they asked for
+recorded under `## Rulings`. Then continue at step 4 for the posting,
+with their hook. Until they approve, no base file exists and no letter
+for the posting is written.
 
 **Promote a new shape.** When a finished, sendable letter is a shape no
 base covers, write it as
