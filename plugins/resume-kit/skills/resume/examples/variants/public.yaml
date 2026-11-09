@@ -1,0 +1,11 @@
+# An example variant: the public copy of the example resume, without its
+# phone number. A variant only removes entries from details, links, skills
+# or hobbies; it never adds or restates content. base names a content file
+# in the folder that holds this variants/ folder.
+#
+#   bin/build-variant examples/variants/public.yaml -o <folder outside the content folder>/public.pdf
+base: sample-resume.yaml
+omit:
+  details: ["(555)"]
+assert_absent:
+  - "(555) 0142"

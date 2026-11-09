@@ -18,10 +18,12 @@ output and may be older than the content.
 Two roots, and they are not interchangeable.
 
 - Everything this plugin ships sits under `${CLAUDE_SKILL_DIR}`:
-  `${CLAUDE_SKILL_DIR}/bin/build`, `${CLAUDE_SKILL_DIR}/bin/new-content-folder` and its `starter/`, `template.typ`, `components.typ`,
-  `design-spec.md`, `content-rules.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
+  `${CLAUDE_SKILL_DIR}/bin/build`, `${CLAUDE_SKILL_DIR}/bin/new-content-folder` and its `starter/`,
+  `${CLAUDE_SKILL_DIR}/bin/build-variant` and its `examples/variants/`,
+  `template.typ`, `components.typ`, `design-spec.md`, `content-rules.md`, and
+  the scripts under `${CLAUDE_SKILL_DIR}/tools`.
 - Everything the user owns sits in the current working directory: the
-  content YAML, `KNOWLEDGE.md`, `drafts/` and `CLAUDE.md`.
+  content YAML, `KNOWLEDGE.md`, `drafts/`, `variants/` and `CLAUDE.md`.
 
 Write the variable verbatim in every command. A relative path with no root
 resolves against the user's resume directory, where none of this plugin
@@ -43,6 +45,30 @@ name is the first thing a recruiter sees. The builder expands a leading
 `~`, then refuses, with nothing written, any `-o` inside the folder the
 session runs from or inside the content file's folder; a relative `-o`
 always is.
+
+## Variants
+
+A variant is a copy of a content file with some entries removed, such as a
+public copy without a phone number. It is a YAML file in a `variants/` folder
+beside the content files:
+
+- `base:` names a content file in the folder above `variants/`.
+- `omit:` maps `details`, `links`, `skills` or `hobbies` to substrings. Every
+  entry in that section containing one of them is removed. Nothing is added
+  or restated.
+- `assert_absent:` lists strings that must not appear in the rendered PDF
+  text.
+
+```sh
+${CLAUDE_SKILL_DIR}/bin/build-variant <variant.yaml>                 # review build, temp folder
+${CLAUDE_SKILL_DIR}/bin/build-variant <variant.yaml> -o <out.pdf>    # PDF at the path given
+```
+
+`-o` must be a file path, not a folder. It is refused inside the content
+folder, and a relative `-o` resolves against the folder the command runs
+from. The build fails, writing nothing, when an `assert_absent` string
+survives in the rendered text or when `pdftotext` is not installed. An
+example is `${CLAUDE_SKILL_DIR}/examples/variants/public.yaml`.
 
 ## Starting a content folder
 
