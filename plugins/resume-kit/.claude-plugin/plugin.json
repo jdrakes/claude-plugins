@@ -1,7 +1,7 @@
 {
   "name": "resume-kit",
   "description": "An opinionated resume toolkit: a Typst renderer with its geometry documented, an interview skill that records facts before any bullet is written, a cold-reader screener agent, and a snapshot test that catches layout regressions.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "author": {
     "name": "James Drakes"
   },
