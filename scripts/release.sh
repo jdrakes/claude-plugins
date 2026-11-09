@@ -46,7 +46,7 @@ bash scripts/test.sh
 tag="$plugin-v$version"
 git add "$manifest" "plugins/$plugin/.claude-plugin/shipped.json"
 git commit -m "Release $plugin v$version"
-git tag "$tag"
+git tag -a "$tag" -m "Release $plugin v$version"
 
 echo
 echo "Committed and tagged $tag."
