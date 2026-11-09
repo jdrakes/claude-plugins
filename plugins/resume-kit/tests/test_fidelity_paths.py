@@ -44,14 +44,7 @@ class SkillDirResolutionTests(unittest.TestCase):
         return subprocess.run(argv, capture_output=True, text=True, env=env)
 
     def _assert_check_fidelity_ok(self, result):
-        """check-fidelity.sh prints SKIP: and exits 0 when the host's typst
-        is not the version the baseline was rendered on. Skill directory
-        resolution is all these tests pin and it has already happened by
-        then, so report a skip as a skip rather than failing the suite."""
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        for line in result.stdout.splitlines():
-            if line.startswith("SKIP:"):
-                self.skipTest(line)
         self.assertIn("PASS:", result.stdout)
 
     def _holder_with_symlink(self, tmp, name):
