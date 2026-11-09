@@ -23,7 +23,7 @@ Two roots, and they are not interchangeable.
   `template.typ`, `components.typ`, `design-spec.md`, `content-rules.md`, and
   the scripts under `${CLAUDE_SKILL_DIR}/tools`.
 - Everything the user owns sits in the current working directory: the
-  content YAML, `KNOWLEDGE.md`, `drafts/` and `CLAUDE.md`.
+  content YAML, `KNOWLEDGE.md`, `drafts/`, `variants/` and `CLAUDE.md`.
 
 Write the variable verbatim in every command. A relative path with no root
 resolves against the user's resume directory, where none of this plugin

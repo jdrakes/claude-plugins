@@ -15,7 +15,10 @@ a second typst call, and the PDF's text is then checked with pdftotext: a
 forbidden string still present fails the build and nothing is written.
 
 No rendered PDF is written into the content folder. With no -o the PDF goes
-to the temp folder; an -o inside the content folder is refused.
+to the temp folder; an output inside the content folder is refused, whether
+it comes from -o or from a TMPDIR that points there. When assert_absent
+names anything and the PDF yields no text, the build fails rather than
+passing every check against nothing.
 
 Usage:
   build-variant <variant.yaml>              <temp>/<variant stem>.pdf
@@ -168,6 +171,14 @@ def place_output(cwd, given, folder):
         return None, f"refusing to write output over a .yaml file: {path}"
     if given.endswith("/") or os.path.isdir(path):
         return None, f"{path} is a folder; give -o a file path"
+    return outside_content(path, folder)
+
+
+def outside_content(path, folder):
+    """path as a Path, or an error when it lies inside the content folder.
+    Both the -o path and the default temp path go through it, since TMPDIR
+    can point anywhere."""
+    path = os.path.realpath(path)
     folder = os.path.realpath(folder)
     if inside(path, folder):
         return None, f"refusing to write {path}: it is inside the content folder, {folder}"
@@ -203,12 +214,13 @@ def main(argv):
         print(error, file=sys.stderr)
         return 1
     if output_arg is None:
-        output = Path(tempfile.gettempdir()) / f"{variant.stem}.pdf"
+        output, error = outside_content(Path(tempfile.gettempdir()) / f"{variant.stem}.pdf",
+                                        resolved["content_folder"])
     else:
         output, error = place_output(Path.cwd(), output_arg, resolved["content_folder"])
-        if error:
-            print(error, file=sys.stderr)
-            return 1
+    if error:
+        print(error, file=sys.stderr)
+        return 1
     if shutil.which("pdftotext") is None:
         print("pdftotext not found: the absent-text check cannot run. Install poppler "
               "(brew install poppler, or apt-get install poppler-utils).", file=sys.stderr)
@@ -229,6 +241,10 @@ def main(argv):
         text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True)
         if text.returncode != 0:
             sys.stderr.write(text.stderr)
+            return 1
+        if resolved["assert_absent"] and not text.stdout.strip():
+            print(f"FAIL: no text extracted; cannot check assert_absent; nothing written "
+                  f"to {output}", file=sys.stderr)
             return 1
         found = absent_failures(text.stdout, resolved["assert_absent"])
         if found:

@@ -307,16 +307,10 @@ class ScriptTests(unittest.TestCase):
         work = tempfile.TemporaryDirectory()
         self.addCleanup(work.cleanup)
         self.work = Path(work.name).resolve()
-        stubs = self.work / "stubs"
-        stubs.mkdir()
-        typst = stubs / "typst"
-        typst.write_text('#!/usr/bin/env bash\nfor last; do :; done\nprintf stub > "$last"\n',
-                         encoding="utf-8")
-        typst.chmod(0o755)
-        pdftotext = stubs / "pdftotext"
-        pdftotext.write_text('#!/usr/bin/env bash\ncat "$PDFTOTEXT_STUB_TEXT"\n',
-                             encoding="utf-8")
-        pdftotext.chmod(0o755)
+        self.stubs = self.work / "stubs"
+        self.stubs.mkdir()
+        self.write_stub("typst", 'for last; do :; done\nprintf stub > "$last"\n')
+        self.write_stub("pdftotext", 'cat "$PDFTOTEXT_STUB_TEXT"\n')
         self.temp_folder = self.work / "temp"
         self.temp_folder.mkdir()
         self.home = self.work / "home"
@@ -334,11 +328,16 @@ class ScriptTests(unittest.TestCase):
         self.rendered_text = self.work / "rendered.txt"
         self.environment = {
             **os.environ,
-            "PATH": f"{stubs}{os.pathsep}{os.environ['PATH']}",
+            "PATH": f"{self.stubs}{os.pathsep}{os.environ['PATH']}",
             "TMPDIR": f"{self.temp_folder}/",
             "HOME": str(self.home),
             "PDFTOTEXT_STUB_TEXT": str(self.rendered_text),
         }
+
+    def write_stub(self, name, body):
+        stub = self.stubs / name
+        stub.write_text(f"#!/usr/bin/env bash\n{body}", encoding="utf-8")
+        stub.chmod(0o755)
 
     def run_script(self, *arguments):
         return subprocess.run([str(SCRIPT), str(self.variant), *arguments],
@@ -374,6 +373,61 @@ class ScriptTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.temp_folder / "web.pdf").is_file())
         self.assertEqual(self.content_files(), ["base.yaml", "variants", "variants/web.yaml"])
+
+    def test_a_temp_folder_inside_the_content_folder_is_refused(self):
+        # Breaks if the default output skips the content folder guard: a
+        # TMPDIR inside the content folder would land the PDF there.
+        self.rendered_text.write_text("Alex Rivera\n", encoding="utf-8")
+        self.environment["TMPDIR"] = f"{self.folder}/"
+        result = self.run_script()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(f"it is inside the content folder, {self.folder}", result.stderr)
+        self.assertEqual(self.content_files(), ["base.yaml", "variants", "variants/web.yaml"])
+
+    def test_an_output_inside_the_content_folder_is_refused(self):
+        # Breaks if main stops passing -o through place_output.
+        self.rendered_text.write_text("Alex Rivera\n", encoding="utf-8")
+        result = self.run_script("-o", str(self.folder / "resume.pdf"))
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(f"it is inside the content folder, {self.folder}", result.stderr)
+        self.assertEqual(self.content_files(), ["base.yaml", "variants", "variants/web.yaml"])
+
+    def test_a_failed_render_fails_and_writes_nothing(self):
+        # Breaks if bin/build's exit code is ignored and a missing or
+        # partial PDF is checked and copied.
+        self.write_stub("typst", 'echo "typst stub failed" >&2\nexit 1\n')
+        self.rendered_text.write_text("Alex Rivera\n", encoding="utf-8")
+        result = self.run_script("-o", "public/resume.pdf")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("typst stub failed", result.stderr)
+        self.assertFalse((self.elsewhere / "public").exists())
+
+    def test_a_failed_text_extraction_fails_and_writes_nothing(self):
+        # Breaks if pdftotext's exit code is ignored: its empty output would
+        # pass every absent check.
+        self.write_stub("pdftotext", 'echo "pdftotext stub failed" >&2\nexit 1\n')
+        result = self.run_script("-o", "public/resume.pdf")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("pdftotext stub failed", result.stderr)
+        self.assertFalse((self.elsewhere / "public").exists())
+
+    def test_empty_extracted_text_fails_when_there_is_something_to_check(self):
+        # Breaks if empty text is checked as it is: every forbidden string
+        # would be absent from it and the check would pass vacuously.
+        self.rendered_text.write_text(" \n\f\n", encoding="utf-8")
+        result = self.run_script("-o", "public/resume.pdf")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no text extracted; cannot check assert_absent", result.stderr)
+        self.assertFalse((self.elsewhere / "public").exists())
+
+    def test_empty_extracted_text_passes_when_there_is_nothing_to_check(self):
+        # Breaks if the empty text check runs with no assert_absent, which
+        # would refuse a variant that asked for no check.
+        self.variant.write_text(yaml.safe_dump({"base": "base.yaml"}), encoding="utf-8")
+        self.rendered_text.write_text("", encoding="utf-8")
+        result = self.run_script("-o", "public/resume.pdf")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.elsewhere / "public" / "resume.pdf").is_file())
 
     def test_an_unknown_flag_is_a_usage_error(self):
         result = self.run_script("--force")
