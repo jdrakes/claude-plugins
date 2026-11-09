@@ -1,0 +1,14 @@
+{
+  "name": "schedule-rules",
+  "description": "Calendar judgment from a rules file you write: read the live calendar before any change, propose specific interview windows from open time, apply contingencies written down ahead of time, and review each month's drift against your rules and, optionally, your goals.",
+  "version": "0.1.0",
+  "author": {
+    "name": "James Drakes"
+  },
+  "keywords": [
+    "calendar",
+    "scheduling",
+    "interviews",
+    "routine"
+  ]
+}

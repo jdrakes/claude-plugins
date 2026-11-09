@@ -31,6 +31,13 @@
       "author": { "name": "James Drakes" },
       "category": "productivity",
       "source": "./plugins/design-review"
+    },
+    {
+      "name": "schedule-rules",
+      "description": "Calendar judgment from a rules file you write: read the live calendar before any change, propose specific interview windows from open time, apply contingencies written down ahead of time, and review each month's drift against your rules and, optionally, your goals.",
+      "author": { "name": "James Drakes" },
+      "category": "productivity",
+      "source": "./plugins/schedule-rules"
     }
   ]
 }
