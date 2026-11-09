@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""Build a resume variant: a subtractive overlay on a content file.
+
+A variant lives in a `variants/` folder beside the content files and names
+its base by file name:
+
+  base: resume-v3.yaml          # a file in the folder above variants/
+  omit:                         # section: [substring, ...]
+    details: ["tel:"]
+  assert_absent: ["(555) 0142"] # must not appear in the rendered text
+
+It only removes entries from the flat-list sections (details, links,
+skills, hobbies). The resolved content is rendered through bin/build, never
+a second typst call, and the PDF's text is then checked with pdftotext: a
+forbidden string still present fails the build and nothing is written.
+
+No rendered PDF is written into the content folder. With no -o the PDF goes
+to the temp folder; an -o inside the content folder is refused.
+
+Usage:
+  build-variant <variant.yaml>              <temp>/<variant stem>.pdf
+  build-variant <variant.yaml> -o <out.pdf> PDF at <out.pdf>
+"""
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+import yaml
+
+SKILL_DIR = Path(__file__).resolve().parent.parent
+ALLOWED_SECTIONS = {"details", "links", "skills", "hobbies"}
+USAGE = "usage: build-variant <variant-file> [-o <output.pdf>]"
+
+
+def matches(entry, patterns):
+    """True when any pattern is a substring of entry (a str) or of any of
+    its values (a dict such as {text, link}). resolve checks the types."""
+    haystacks = [entry] if isinstance(entry, str) else list(entry.values())
+    return any(pattern in haystack for pattern in patterns for haystack in haystacks)
+
+
+def entry_error(section, entry):
+    """Why entry cannot be matched against, or None when it can."""
+    if isinstance(entry, str):
+        return None
+    if not isinstance(entry, dict):
+        return (f"section {section!r} holds an entry of type {type(entry).__name__}, "
+                f"not str or a mapping: {entry!r}")
+    for key, value in entry.items():
+        if not isinstance(value, str):
+            return (f"section {section!r} holds an entry whose {key!r} is "
+                    f"{type(value).__name__}, not str: {entry!r}")
+    return None
+
+
+def resolve(content, omit):
+    """A shallow copy of content with each section named in omit filtered,
+    as (content, error). The input is never mutated, and a section named in
+    omit but absent from content stays absent."""
+    unsupported = sorted(set(omit) - ALLOWED_SECTIONS)
+    if unsupported:
+        return None, (f"omit names unsupported section(s): {', '.join(unsupported)} "
+                      f"(allowed: {', '.join(sorted(ALLOWED_SECTIONS))})")
+    result = dict(content)
+    for section, patterns in omit.items():
+        if section not in content:
+            continue
+        entries = content[section]
+        if not isinstance(entries, list):
+            return None, (f"section {section!r} must be a list to filter, got "
+                          f"{type(entries).__name__}: {entries!r}")
+        for entry in entries:
+            error = entry_error(section, entry)
+            if error:
+                return None, error
+        result[section] = [entry for entry in entries if not matches(entry, patterns)]
+    return result, None
+
+
+def content_folder(variant_path):
+    """The folder that holds the variant's variants/ folder."""
+    return Path(variant_path).resolve().parent.parent
+
+
+def read_yaml(path):
+    """The parsed file, as (data, error)."""
+    try:
+        with open(path, encoding="utf-8") as handle:
+            return yaml.safe_load(handle), None
+    except (OSError, yaml.YAMLError) as problem:
+        return None, f"cannot read {path}: {problem}"
+
+
+def is_string_list(value):
+    return isinstance(value, list) and all(isinstance(item, str) for item in value)
+
+
+def load_variant(variant_path):
+    """The resolved variant, as ({content, assert_absent, content_folder},
+    error). An explicit null omit or assert_absent counts as absent."""
+    spec, error = read_yaml(variant_path)
+    if error:
+        return None, f"variant {variant_path}: {error}"
+    if not isinstance(spec, dict):
+        return None, (f"variant {variant_path} must be a YAML mapping with a 'base' key, "
+                      f"got {type(spec).__name__}")
+    if "base" not in spec:
+        return None, (f"variant {variant_path} has no 'base' key: a variant names a "
+                      f"content file in the folder above variants/")
+    base = spec["base"]
+    if not isinstance(base, str):
+        return None, f"variant {variant_path} has a 'base' that is {type(base).__name__}, not str"
+    if os.path.isabs(base):
+        return None, (f"variant {variant_path} names 'base' {base!r} as an absolute path; "
+                      f"name a file in the folder above variants/")
+    folder = content_folder(variant_path)
+    base_path = folder / base
+    if not base_path.is_file():
+        return None, f"variant {variant_path} names base {base!r}, resolved to {base_path}, which is not a file"
+    omit = spec.get("omit") or {}
+    if not isinstance(omit, dict) or not all(is_string_list(patterns) for patterns in omit.values()):
+        return None, (f"variant {variant_path} has an invalid 'omit': it must map each "
+                      f"section to a list of strings, got {omit!r}")
+    assert_absent = spec.get("assert_absent") or []
+    if not is_string_list(assert_absent):
+        return None, (f"variant {variant_path} has an invalid 'assert_absent': it must be "
+                      f"a list of strings, got {assert_absent!r}")
+    content, error = read_yaml(base_path)
+    if error:
+        return None, error
+    if not isinstance(content, dict):
+        return None, f"base {base_path} must be a YAML mapping, got {type(content).__name__}"
+    resolved, error = resolve(content, omit)
+    if error:
+        return None, f"variant {variant_path}: {error}"
+    return {"content": resolved, "assert_absent": assert_absent, "content_folder": folder}, None
+
+
+def inside(path, folder):
+    """By file identity as well as by spelling: on a case-insensitive disk
+    "Content" and "content" are one folder but two strings. The existing
+    ancestors of path are compared, since path itself may not exist yet.
+    Copied from bin/build."""
+    if os.path.commonpath([path, folder]) == folder:
+        return True
+    if not os.path.exists(folder):
+        return False
+    ancestor = path
+    while not os.path.exists(ancestor):
+        ancestor = os.path.dirname(ancestor)
+    while True:
+        if os.path.samefile(ancestor, folder):
+            return True
+        if os.path.dirname(ancestor) == ancestor:
+            return False
+        ancestor = os.path.dirname(ancestor)
+
+
+def place_output(cwd, given, folder):
+    """Where an -o lands, as (path, error). The current folder is allowed,
+    unlike bin/build: the content folder guard already covers running from
+    the content folder."""
+    path = os.path.realpath(os.path.join(cwd, os.path.expanduser(given)))
+    if path.endswith((".yaml", ".yml")):
+        return None, f"refusing to write output over a .yaml file: {path}"
+    if given.endswith("/") or os.path.isdir(path):
+        return None, f"{path} is a folder; give -o a file path"
+    folder = os.path.realpath(folder)
+    if inside(path, folder):
+        return None, f"refusing to write {path}: it is inside the content folder, {folder}"
+    return Path(path), None
+
+
+def absent_failures(text, forbidden):
+    """The forbidden strings found in text, in order."""
+    return [string for string in forbidden if string in text]
+
+
+def parse_arguments(argv):
+    """(variant, output argument or None), or None for a usage error."""
+    if len(argv) == 1 and not argv[0].startswith("-"):
+        return argv[0], None
+    if len(argv) == 3 and argv[1] == "-o":
+        return argv[0], argv[2]
+    return None
+
+
+def main(argv):
+    parsed = parse_arguments(argv)
+    if parsed is None:
+        print(USAGE, file=sys.stderr)
+        return 1
+    variant_arg, output_arg = parsed
+    variant = Path.cwd() / variant_arg
+    if not variant.is_file():
+        print(f"variant file not found: {variant}", file=sys.stderr)
+        return 1
+    resolved, error = load_variant(variant)
+    if error:
+        print(error, file=sys.stderr)
+        return 1
+    if output_arg is None:
+        output = Path(tempfile.gettempdir()) / f"{variant.stem}.pdf"
+    else:
+        output, error = place_output(Path.cwd(), output_arg, resolved["content_folder"])
+        if error:
+            print(error, file=sys.stderr)
+            return 1
+    if shutil.which("pdftotext") is None:
+        print("pdftotext not found: the absent-text check cannot run. Install poppler "
+              "(brew install poppler, or apt-get install poppler-utils).", file=sys.stderr)
+        return 1
+    with tempfile.TemporaryDirectory(prefix="resume-variant-") as scratch:
+        scratch = Path(scratch)
+        (scratch / "content").mkdir()
+        content_file = scratch / "content" / "content.yaml"
+        content_file.write_text(
+            yaml.safe_dump(resolved["content"], sort_keys=False, allow_unicode=True),
+            encoding="utf-8")
+        pdf = scratch / "out" / "variant.pdf"
+        built = subprocess.run([str(SKILL_DIR / "bin" / "build"), str(content_file), "-o", str(pdf)],
+                               cwd=scratch / "content", capture_output=True, text=True)
+        if built.returncode != 0:
+            sys.stderr.write(built.stderr)
+            return 1
+        text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True)
+        if text.returncode != 0:
+            sys.stderr.write(text.stderr)
+            return 1
+        found = absent_failures(text.stdout, resolved["assert_absent"])
+        if found:
+            print(f"FAIL: the variant still contains: {found}; nothing written to {output}",
+                  file=sys.stderr)
+            return 1
+        output.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(pdf, output)
+    print(f"assert_absent: {len(resolved['assert_absent'])} check(s) passed")
+    print(f"built {output}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
