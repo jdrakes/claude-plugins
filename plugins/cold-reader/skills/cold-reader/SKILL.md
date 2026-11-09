@@ -55,10 +55,10 @@ Decide which from the invocation, in one line, then act.
 |---|---|
 | nothing | the highest-numbered chapter in the chapters directory |
 | a chapter number `NN` | the chapter in the chapters directory with that number |
-| a file | that file; a numbered chapter in the chapters directory is chapter mode, anything else is piece mode |
+| a file | that file; if no chapters directory is named and the file is a numbered chapter, its own directory becomes the chapters directory; a numbered chapter in the chapters directory is chapter mode, anything else is piece mode |
 
-If no chapters directory is named, or it has no numbered chapter, or
-none with that number, say so in one line and stop; do not fall back to
+If there is still no chapters directory, or it has no numbered chapter,
+or none with that number, say so in one line and stop; do not fall back to
 another directory unasked.
 
 Name the piece in the opening line. Then dispatch.
