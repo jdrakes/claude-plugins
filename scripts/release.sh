@@ -39,10 +39,12 @@ with open(path, "w") as f:
     f.write("\n")
 PYEOF
 
+python3 scripts/check_versions.py --write "$plugin"
+
 bash scripts/test.sh
 
 tag="$plugin-v$version"
-git add "$manifest"
+git add "$manifest" "plugins/$plugin/.claude-plugin/shipped.json"
 git commit -m "Release $plugin v$version"
 git tag "$tag"
 
