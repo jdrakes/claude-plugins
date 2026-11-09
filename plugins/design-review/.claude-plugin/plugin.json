@@ -1,7 +1,7 @@
 {
   "name": "design-review",
   "description": "Design judgment for an existing UI: a skill and an agent that review or change a screen against the project's own tokens, universal practice (WCAG AA contrast on the real colour pair, hierarchy, spacing, restraint) and a taste file that is weighed, never enforced.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": {
     "name": "James Drakes"
   },
