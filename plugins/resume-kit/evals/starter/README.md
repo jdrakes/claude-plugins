@@ -64,35 +64,37 @@ is an invented example, and the check is that the review runs end to end.
 
 ## Last run
 
-2026-11-09, opus, the plugin as of the commit that adds this file. The
-narrower build rule was enough; no rerun with `"Bash"`.
-That run used the six-line dispatch the screener had before it stopped
-reading the content rules; the Dispatch row below records that, not the
-current four lines.
+2026-11-09, opus, on the starter as it now ships: the current role ends
+`Present`, and the Sample Labs bullet says what the process does instead
+of naming its steps. The narrower build rule was enough; no rerun with
+`"Bash"`.
 
 | Check | Result |
 | --- | --- |
-| Dispatch | **pass.** Six lines: `content: <F>/resume-v1.yaml`, `pdf: <temp>/review-resume-v1.pdf`, `posting: none`, `defaults: <P>/skills/resume/content-rules.md`, `own-rules: <F>/CLAUDE.md`, `today: 2026-11-09` |
-| First line | **pass.** "I read 1 page of the PDF, all of it." |
-| Verdict and findings | **pass.** Verdict maybe, six findings, each quoting the page |
+| Dispatch | **pass.** Four lines: `content: <F>/resume-v1.yaml`, `pdf: <temp>/review-resume-v1.pdf`, `posting: none`, `today: 2026-11-09`. No `defaults:` or `own-rules:` |
+| First line | **pass.** "I read 1 of 1 pages." |
+| Verdict and findings | **pass.** Verdict maybe, six findings, five quoting a line of the page and the first naming the Employment History section as a whole |
 | Folder left alone | **pass.** `ls -A` shows `CLAUDE.md`, `KNOWLEDGE.md`, `drafts`, `resume-v1.yaml`; `find` prints nothing |
 
-The six findings, most severe first: the current role's date line "MAR
-2022" has no end date; three bullets for about eight years; no technology
-named in any bullet; no measure of size beyond "40 internal teams";
-"replacing three copies of the same logic"; "from backfill to the order of
-the two deploys".
+The date line now reads "MAR 2022 - PRESENT", and the screener computed
+both tenures from it.
 
-Two findings name a content rule:
+The six findings, most severe first: three bullets for more than eight
+years, with the main column ending past the middle of the page; the
+summary's "eight years on order and billing services" not backed by the
+Sample Labs bullet; the phone number "(555) 0142" is not dialable; no
+technology named in any bullet; "Built the order service that 40 internal
+teams call" does not say whether Alex led it; the "Portfolio" and "Source"
+links hide their URLs. It also noted, from the YAML header, that the
+content is an invented example.
 
-- "replacing three copies of the same logic", under the least-charitable
-  rule: it describes the employer's earlier code as duplicated, and is
-  not a before and after number for the owner's own work.
-- "from backfill to the order of the two deploys", under the rule against
-  mechanism jargon a recruiter cannot use.
+No finding names a content rule, and none cites a rule against the
+starter's own text.
 
-Both quote the example `resume-v1.yaml` the starter copies. The verdict is
-not gated, so neither affects the pass.
-
-The same four checks passed on an earlier run that day, against the
-plugin before the least-charitable rule was clarified.
+The run before this one, on the same day, used the six-line dispatch the
+screener had before it stopped reading the content rules, and two of its
+findings named a content rule against the starter: "replacing three copies
+of the same logic" (least-charitable) and "from backfill to the order of
+the two deploys" (mechanism jargon). Its top finding was the current
+role's date line, "MAR 2022" with no end date. All three are fixed in
+what the starter now ships.

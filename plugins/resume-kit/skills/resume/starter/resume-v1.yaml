@@ -44,14 +44,16 @@ hobbies:
 
 # Main column. Each title line renders as "role, company, location", and
 # location is optional. The date line puts the template's own separator
-# between start and end, so do not write one. Leave end blank for a
-# current role. Write dates as they should appear, such as MAR 2022.
+# between start and end, so do not write one. Write Present as the end
+# of a current role; a role with no end shows only its start date, which
+# reads as a role of unknown length. Write dates as they should appear,
+# such as MAR 2022.
 experience:
   - role: Senior Software Engineer
     company: Example Corp
     location: Portland, Oregon
     start: MAR 2022
-    end:                              # blank: current role
+    end: Present                      # the current role
     bullets:
       - Built the order service that 40 internal teams call to place and
         track orders, so a new team ships its first order in a day.
@@ -65,8 +67,8 @@ experience:
     end: FEB 2022
     bullets:
       - Designed the schema migration process every database change at
-        Sample Labs now follows, from backfill to the order of the two
-        deploys.
+        Sample Labs now follows, so a team can change a live table in one
+        release.
 
 education:
   - degree: Bachelor of Science in Computer Science

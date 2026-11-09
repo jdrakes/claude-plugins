@@ -44,8 +44,8 @@ gave it and when.
   server also retried, which had doubled database load since launch. Alex
   removed the client retry, which halved database load. (Alex, 2026-01-10)
 - **Search service.** Nobody owned the search service when Alex took it on.
-  A filter meant to use an index ran a full-text scan on every query;
-  removing it cut p99 latency by half. Alex wrote a runbook and a design note,
+  Alex changed how one query filter uses its index, which cut p99 latency
+  by half. Alex wrote a runbook and a design note,
   and two other engineers have since taken on-call for it. (Alex, 2026-01-10)
 
 ## Pinegrove Labs, Software Engineer (August 2017 to May 2019)

@@ -127,11 +127,20 @@ to Lakeside and repeats the checklist; the mechanism covers callers that
 read but the claim is about writes; "I also took on the search service"
 reads like a resume line; the opening goes generic after sentence 2. In
 Pass 2 it marks the p99 claim traced, with a wording mismatch: the letter
-says "changing how one query filter uses its index", `KNOWLEDGE.md` says
-"removing it" of a filter that ran a full-text scan, and `skills/resume/examples/sample-resume.yaml` says
-"removing an accidental full-text scan". The resume half of that rests on
-the layout fixture's wording, which this plan leaves alone; it is a known
-fixture limitation, not a reader fault.
+said "changing how one query filter uses its index" and `KNOWLEDGE.md`
+said "removing it" of a filter that ran a full-text scan.
+
+After this run, `KNOWLEDGE.md` was changed to record the fix the letters
+describe: Alex changed how one query filter uses its index, which cut p99
+latency by half. The letters now trace to the record as written. The
+cases were not rerun after that change. Two texts still say "full-text
+scan", and neither is the record a letter traces to:
+
+- `skills/resume/examples/sample-resume.yaml`, the layout fixture, which
+  this plan leaves alone.
+- The search-service sentence in `letter-broken.md`. A reader may now
+  report it as untraceable; that is another allowed finding, and the
+  case's planted defects are unchanged.
 
 `letter-broken.md`, against its row:
 

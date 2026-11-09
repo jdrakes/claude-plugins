@@ -100,6 +100,20 @@ class BuildTests(unittest.TestCase):
                                   capture_output=True, text=True, check=True).stdout
             self.assertRegex(info, r"(?m)^Pages:\s+1$")
 
+    @unittest.skipUnless(shutil.which("pdftotext"), "needs pdftotext")
+    def test_the_current_role_shows_a_date_range(self):
+        # A blank end prints only "MAR 2022", which a reader takes for a
+        # role of unknown length; the starter writes Present instead.
+        with tempfile.TemporaryDirectory() as work, tempfile.TemporaryDirectory() as temp_folder:
+            folder = Path(work) / "alex"
+            self.assertEqual(create(folder).returncode, 0)
+            subprocess.run([str(BUILD), "resume-v1.yaml"], cwd=folder,
+                           env={**os.environ, "TMPDIR": temp_folder},
+                           capture_output=True, text=True, check=True)
+            text = subprocess.run(["pdftotext", str(Path(temp_folder) / "resume-v1.pdf"), "-"],
+                                  capture_output=True, text=True, check=True).stdout
+            self.assertIn("MAR 2022 - PRESENT", text)
+
 
 if __name__ == "__main__":
     unittest.main()
