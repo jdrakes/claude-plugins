@@ -254,6 +254,14 @@ rewrites and never proposes a bullet.
 reads the letter cold as a hiring manager would, then traces every claim,
 and never proposes a sentence.
 
+**Content rules.** `skills/resume/content-rules.md` holds the default rules
+for what a resume or a letter says: where a fact may come from, how a past
+employer is described, what a page that does not fit gives up first, and
+drafting before the live file changes. `resume-writer`, `screener` and
+`letter-reader` get its path in their dispatch, with your content folder's
+`CLAUDE.md`. The `## Content rules` section there holds your own rules: they
+add to the defaults, and yours win where they contradict one.
+
 ### What your project needs to provide
 
 Run every resume-kit skill from your resume directory; each one resolves
@@ -266,7 +274,7 @@ fixed path.
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
 | `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
-| An optional `CLAUDE.md` in the content folder | `cover-letter` reads the live resume's file name, the content rules and any writing-style skill to invoke from it |
+| An optional `CLAUDE.md` in the content folder | Its `## Content rules` section adds to resume-kit's default content rules and wins where it contradicts one. `cover-letter` also reads the live resume's file name, any writing-style skill to invoke and the send folder from it |
 
 A posting is optional and always supplied as a file you name: `resume-review`
 reads it for its second pass, and `resume-assessment` reads one posting per

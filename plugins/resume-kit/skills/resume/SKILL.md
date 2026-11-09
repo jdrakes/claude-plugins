@@ -19,9 +19,9 @@ Two roots, and they are not interchangeable.
 
 - Everything this plugin ships sits under `${CLAUDE_SKILL_DIR}`:
   `${CLAUDE_SKILL_DIR}/bin/build`, `template.typ`, `components.typ`,
-  `design-spec.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
+  `design-spec.md`, `content-rules.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
 - Everything the user owns sits in the current working directory: the
-  content YAML, `KNOWLEDGE.md`, `drafts/`.
+  content YAML, `KNOWLEDGE.md`, `drafts/` and `CLAUDE.md`.
 
 Write the variable verbatim in every command. A relative path with no root
 resolves against the user's resume directory, where none of this plugin
@@ -62,10 +62,17 @@ exists. Confirm `KNOWLEDGE.md` holds interview facts for the role, else run
     draft: <absolute path to the draft YAML>
     role: <role, company, dates, as the draft's entry names them>
     facts: <the KNOWLEDGE.md section heading, or several, one per line>
+    defaults: <absolute path to resume-kit's skills/resume/content-rules.md>
+    own-rules: <absolute path to the content folder's CLAUDE.md, or "none">
+
+`defaults:` is `${CLAUDE_SKILL_DIR}/content-rules.md`. `own-rules:` is the
+working directory's `CLAUDE.md` when it has one, else "none".
 
 Relay its report, build the draft to a temporary path, and run
-`resume-kit:resume-review` on it. The summary is not the writer's: draft
-two candidates in chat, in the author's register, for the user to pick or
+`resume-kit:resume-review` on it. The summary is not the writer's. Read
+`${CLAUDE_SKILL_DIR}/content-rules.md` and the content folder's
+`## Content rules` first, since they bind the summary too; then draft two
+candidates in chat, in the author's register, for the user to pick or
 rewrite. Promoting a draft over the live file is the user's call and never
 this skill's.
 

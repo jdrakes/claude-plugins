@@ -50,11 +50,12 @@ class DispatchTests(unittest.TestCase):
         self.assertNotEqual(dispatch_block(self.skill), [])
         self.assertEqual(dispatch_block(self.skill), dispatch_block(self.agent))
 
-    def test_the_block_has_the_eight_keys_in_order(self):
+    def test_the_block_has_the_ten_keys_in_order(self):
         keys = [line.strip().split(":", 1)[0] for line in dispatch_block(self.skill)]
         self.assertEqual(
             keys,
-            ["letter", "application", "posting", "resume", "knowledge", "bar", "words", "today"],
+            ["letter", "application", "posting", "resume", "knowledge",
+             "defaults", "own-rules", "bar", "words", "today"],
         )
 
     def test_the_agent_is_read_only(self):

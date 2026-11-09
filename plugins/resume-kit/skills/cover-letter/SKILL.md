@@ -27,10 +27,13 @@ resolve against it, and files this plugin ships resolve against
 `KNOWLEDGE.md` is not in the working directory, say that the session is not
 in a content folder and stop. Do not guess where the content lives.
 
-When the folder has its own `CLAUDE.md`, read it before anything else. It
-names the live resume file, the user's content rules, any writing-style
-skill, and the folder a send-ready PDF goes to. With no `CLAUDE.md`, ask
-for the live content YAML by name and stop until the user answers; this
+Read `${CLAUDE_PLUGIN_ROOT}/skills/resume/content-rules.md`,
+resume-kit's default content rules, before anything else. Then, when the
+folder has its own `CLAUDE.md`, read it: its `## Content rules` section
+adds to the defaults and wins where it contradicts one. It also names
+the live resume file, the user's content rules, any writing-style skill,
+and the folder a send-ready PDF goes to. With no `CLAUDE.md`, ask for
+the live content YAML by name and stop until the user answers; this
 skill does not guess which file is live.
 
 ## 1. Resolve the posting
@@ -157,7 +160,8 @@ explicit confirmation before it stands.
 
 ## 6. Voice, and be honest that it is a third register
 
-The content folder's `CLAUDE.md` rules bind here. When it names a
+The default content rules and the content folder's own bind here, the
+folder's winning where they contradict. When it names a
 writing-style skill, invoke that skill for its prohibitions, which bind
 too.
 
@@ -236,9 +240,15 @@ else. `words:` is the line step 7 printed for the draft, verbatim, and
     posting: <absolute path to the posting body, or "none">
     resume: <absolute path to the live content YAML>
     knowledge: <absolute path to KNOWLEDGE.md>
+    defaults: <absolute path to resume-kit's skills/resume/content-rules.md>
+    own-rules: <absolute path to the content folder's CLAUDE.md, or "none">
     bar: <the chosen base letter's word total>, from <the base's file name>
     words: <total>, by paragraph <greeting n>/<one n per block>/.../<signature n>
     today: <YYYY-MM-DD>
+
+`defaults:` is `${CLAUDE_PLUGIN_ROOT}/skills/resume/content-rules.md`.
+`own-rules:` is the content folder's `CLAUDE.md`, or "none" when it has
+none.
 
 ## 9. Relay the report unedited, but fix what is yours to fix
 

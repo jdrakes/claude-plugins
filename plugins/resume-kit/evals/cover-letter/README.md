@@ -7,7 +7,7 @@ them is made up.
 ## Why these exist
 
 A skill that dispatches a reader can pass every structural check (the file
-exists, the dispatch names the right agent, the eight lines are there) and
+exists, the dispatch names the right agent, the ten lines are there) and
 still ship a reader that misses what it is for. The cover-letter skill once
 shipped on structural checks alone, and three defects survived that a
 single real dispatch would have exposed. These cases are that dispatch:
@@ -66,7 +66,7 @@ From the plugin directory, with `P` set to its absolute path:
 
 3. For each case, run `claude -p --plugin-dir "$P" --model opus` with a
    prompt saying: make exactly one Agent call with `subagent_type:
-   resume-kit:letter-reader` and the eight lines below as its whole
+   resume-kit:letter-reader` and the ten lines below as its whole
    message, then print the agent's report verbatim and nothing else.
 
    ```
@@ -75,6 +75,8 @@ From the plugin directory, with `P` set to its absolute path:
    posting: <P>/evals/cover-letter/posting.txt
    resume: <P>/skills/resume/examples/sample-resume.yaml
    knowledge: <P>/skills/cover-letter/examples/KNOWLEDGE.md
+   defaults: <P>/skills/resume/content-rules.md
+   own-rules: none
    bar: <bar>, from 2026-01-12-base-backend-engineer-cover-letter.md
    words: <the words line>
    today: <YYYY-MM-DD>
