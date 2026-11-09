@@ -1,20 +1,23 @@
 """Tests for skills/cover-letter/bin/build-letter.
 
 They protect three parsing rules (where the `## Letter` section ends, which
-trailing words are contact details, what the word count includes), where a
-build is written (never beside the source), and the two render faults that
-still exit 0: a hyphenated word split across two lines, and substitute fonts.
+lines of the last block are contact details, what the word count includes),
+where a build is written (never beside the source, never inside the current
+folder), and the two render faults that still exit 0: a hyphenated word split
+across two lines, and substitute fonts.
 """
 import contextlib
 import importlib.machinery
 import importlib.util
 import io
+import os
 import re
 import shutil
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parent.parent / "skills" / "cover-letter" / "bin" / "build-letter"
 loader = importlib.machinery.SourceFileLoader("build_letter", str(SCRIPT))
@@ -56,6 +59,17 @@ class LetterPayloadTests(unittest.TestCase):
         payload, _ = build_letter.letter_payload(section)
         self.assertEqual(payload["body"], ["Hi,", "line one line two line three"])
 
+    def test_each_contact_line_is_kept_whole_and_the_name_is_the_first_line(self):
+        # Breaks if contact details are picked out word by word again: the
+        # spaced phone formats split, and a profile URL joins the name.
+        for line in ("(512) 555-0142", "+1 512 555 0142", "linkedin.com/in/alexrivera"):
+            with self.subTest(line=line):
+                section = f"Hi,\n\nBody.\n\nAlex Rivera\nalex.rivera@example.com\n{line}"
+                payload, error = build_letter.letter_payload(section)
+                self.assertIsNone(error)
+                self.assertEqual(payload["name"], "Alex Rivera")
+                self.assertEqual(payload["contact"], ["alex.rivera@example.com", line])
+
     def test_last_block_without_email_or_phone_is_an_error(self):
         payload, error = build_letter.letter_payload("Hi,\n\nBody.\n\nAlex Rivera")
         self.assertIsNone(payload)
@@ -69,23 +83,27 @@ class WordsLineTests(unittest.TestCase):
 
 
 class OutputPathTests(unittest.TestCase):
+    CWD = Path("/x/cwd")
+
     def test_no_output_goes_to_the_temp_folder(self):
-        self.assertEqual(build_letter.output_path(Path("/x/a.md"), None, "Alex Rivera"),
-                         Path(tempfile.gettempdir()) / "a.pdf")
+        self.assertEqual(build_letter.output_path(Path("/x/a.md"), None, "Alex Rivera", self.CWD),
+                         (Path(tempfile.gettempdir()) / "a.pdf", None))
 
     def test_folder_gets_the_send_ready_name(self):
         with tempfile.TemporaryDirectory() as work:
             folder = Path(work).resolve()
             expected = folder / "Alex Rivera Cover Letter.pdf"
             source = Path("/x/a.md")
-            self.assertEqual(build_letter.output_path(source, str(folder), "Alex Rivera"), expected)
+            self.assertEqual(build_letter.output_path(source, str(folder), "Alex Rivera", self.CWD),
+                             (expected, None))
             self.assertEqual(
-                build_letter.output_path(source, str(folder / "new") + "/", "Alex Rivera"),
-                folder / "new" / "Alex Rivera Cover Letter.pdf")
+                build_letter.output_path(source, str(folder / "new") + "/", "Alex Rivera", self.CWD),
+                (folder / "new" / "Alex Rivera Cover Letter.pdf", None))
 
     def test_a_file_path_is_used_as_given(self):
-        self.assertEqual(build_letter.output_path(Path("/x/a.md"), "/tmp/x.pdf", "Alex Rivera"),
-                         Path("/tmp/x.pdf").resolve())
+        self.assertEqual(
+            build_letter.output_path(Path("/x/a.md"), "/tmp/x.pdf", "Alex Rivera", self.CWD),
+            (Path("/tmp/x.pdf").resolve(), None))
 
 
 class MainTests(unittest.TestCase):
@@ -116,6 +134,67 @@ class MainTests(unittest.TestCase):
         self.assertEqual(code, 2)
 
 
+def fake_render(payload, output):
+    """Stands in for typst: these tests are about where the PDF goes."""
+    output.write_bytes(b"%PDF-1.7\n")
+
+
+class OutputFolderTests(unittest.TestCase):
+    """main with -o, the render stubbed, in a throwaway layout:
+
+    <work>/home       HOME for the test
+    <work>/letters    holds app.md, the source
+    <work>/cwd        the current folder
+    """
+
+    def setUp(self):
+        self.work = Path(tempfile.mkdtemp()).resolve()
+        self.addCleanup(shutil.rmtree, self.work)
+        for folder in ("home", "letters", "cwd"):
+            (self.work / folder).mkdir()
+        self.source = self.work / "letters" / "app.md"
+        self.source.write_text(f"# App\n\n## Letter\n\nHi Team,\n\nBody.\n\n{SIGNATURE}\n")
+        previous = Path.cwd()
+        os.chdir(self.work / "cwd")
+        self.addCleanup(os.chdir, previous)
+        patches = (mock.patch.dict(os.environ, {"HOME": str(self.work / "home")}),
+                   mock.patch.object(build_letter, "render", fake_render))
+        for patch in patches:
+            patch.start()
+            self.addCleanup(patch.stop)
+
+    def run_main(self, output_arg):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = build_letter.main([str(self.source), "-o", output_arg])
+        return code, err.getvalue()
+
+    def written(self):
+        return sorted(str(path.relative_to(self.work))
+                      for path in self.work.rglob("*") if path.is_file())
+
+    def test_a_quoted_tilde_is_the_home_folder(self):
+        # Breaks if -o is not expanded: "~/out/" then lands at <cwd>/~/out/.
+        code, _ = self.run_main("~/out/")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.written(),
+                         ["home/out/Alex Rivera Cover Letter.pdf", "letters/app.md"])
+
+    def test_a_relative_output_is_refused(self):
+        # Breaks if outputs inside the current folder are written, as before.
+        code, err = self.run_main("out/")
+        self.assertNotEqual(code, 0)
+        self.assertIn("current folder", err)
+        self.assertEqual(self.written(), ["letters/app.md"])
+
+    def test_an_output_beside_the_source_is_refused(self):
+        # Breaks if outputs inside the application file's folder are written.
+        code, err = self.run_main(str(self.work / "letters" / "sent") + "/")
+        self.assertNotEqual(code, 0)
+        self.assertIn("application file's folder", err)
+        self.assertEqual(self.written(), ["letters/app.md"])
+
+
 NEEDS = ("typst", "pdftotext", "pdffonts")
 
 
@@ -130,7 +209,8 @@ class RenderTests(unittest.TestCase):
                         "shared pipeline and a change-data-capture feed for the finance team.")
 
     def build(self, work, body):
-        source = Path(work) / "app.md"
+        (Path(work) / "letters").mkdir()
+        source = Path(work) / "letters" / "app.md"
         source.write_text(f"# App\n\n## Letter\n\nHi Team,\n\n{body}\n\n{SIGNATURE}\n")
         output = Path(work) / "out.pdf"
         self.assertEqual(build_letter.main([str(source), "-o", str(output)]), 0)
@@ -161,7 +241,7 @@ class RenderTests(unittest.TestCase):
             temp_pdf = Path(tempfile.gettempdir()) / "review-build-probe.pdf"
             self.addCleanup(lambda: temp_pdf.unlink(missing_ok=True))
             self.assertEqual(build_letter.main([str(source)]), 0)
-            self.assertEqual([p.name for p in Path(work).iterdir()], ["review-build-probe.md"])
+            self.assertEqual([path.name for path in Path(work).iterdir()], ["review-build-probe.md"])
             self.assertTrue(temp_pdf.exists())
 
 
