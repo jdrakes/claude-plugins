@@ -21,14 +21,16 @@ Each plugin's manifest pins a `version`. Claude Code only treats a plugin
 as updated when that string changes, so pushing ordinary commits to `main`
 never rolls anything out on its own, even with auto-update on.
 
-To cut a release:
-
 Set `LEAK_NEEDLES_FILE` to the path of your private needle file before
 running `scripts/release.sh`. The file holds one term per line. Blank lines
 and lines starting with `#` are ignored. The leak scan checks those terms
 as well as the public list, so a term that must never appear in this public
-repo is caught before it ships. Without the variable the scan checks the
-public list only and prints a line saying the private list was not checked.
+repo is caught before it ships. If the variable is set but the file holds
+no terms (it is empty or has only comments), the scan fails. Without the
+variable the scan checks the public list only and prints a line saying the
+private list was not checked.
+
+To cut a release:
 
 ```
 LEAK_NEEDLES_FILE=/path/to/leak-needles.txt scripts/release.sh <plugin> <version>
