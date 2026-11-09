@@ -11,8 +11,8 @@
 Dear [COMPANY] hiring team,
 
 I am applying for the [ROLE] role. At Northwind Systems I split the table
-every team wrote to into four services, and none of its seventeen callers
-had to release on the same day to make that happen. I have spent nine
+that took every write in the company into four services, and none of its
+seventeen callers had to release on the same day to make that happen. I have spent nine
 years on data-heavy backend services, mostly on schemas, queues and the
 paths that have to stay correct when a dependency is slow. The parts of a
 system that are hard to change later are the parts I like working on.
@@ -30,12 +30,13 @@ minutes and ended the overnight rota that existed only to restart it.
 At Cobalt Harbor I built the billing export every finance tool read from.
 A corrected invoice is reissued as a new record pointing at the one it
 replaces, so history is never edited and finance can see both the
-original and the correction. I added distributed tracing across
-six services and used it to find a client retrying every failed write while
+original and the correction. I added distributed tracing across six
+services and used it to find a client retrying every failed write while
 the server retried too, which had doubled database load since launch. I
-removed the client's retry and kept the server's. I also took over a search service nobody owned, halved its p99 latency by
-removing a full-text scan that a filter triggered on every query, and
-documented it well enough that two other engineers now share it.
+removed the client's retry. I also took over a search service nobody
+owned, halved its p99 latency by removing a full-text scan that a filter
+triggered on every query, and documented it well enough that two other
+engineers have since taken on-call for it.
 
 The habit behind both jobs is the same: plan the migration before the
 schema, measure before changing the hot path, and leave the next engineer
@@ -71,14 +72,14 @@ alex.rivera@example.com
 | Claim in the letter | Source |
 | --- | --- |
 | Nine years on data-heavy backend services; schemas, queues, paths that stay correct when a dependency is slow | Resume summary: "Backend engineer with nine years on data-heavy services" and "schemas, queue semantics, and the paths that stay correct when a dependency is slow" |
-| Split the table every team wrote to into four services | `KNOWLEDGE.md` "Northwind Systems", Orders table split; resume: "Split a single write-heavy orders table into four services" |
+| Split the table that took every write in the company into four services | `KNOWLEDGE.md` "Northwind Systems", Orders table split; resume: "Split a single write-heavy orders table into four services" |
 | Seventeen callers, none releasing on the same day | Resume: "so the seventeen callers could migrate one at a time rather than in a single coordinated release" |
 | The view kept the name and columns, joined across the services; about five months; view dropped | `KNOWLEDGE.md` "Northwind Systems", Orders table split |
 | Schema-change checklist and its steps | `KNOWLEDGE.md` "Northwind Systems", Schema-change checklist; resume: "covering backfills, dual writes and the order the two deploys must happen in" |
 | Reconciliation, four hours to under ten minutes, rota ended | `KNOWLEDGE.md` "Northwind Systems", Nightly reconciliation; resume: "moved the run from four hours to under ten minutes" |
 | Billing export every finance tool read; reissue without editing history; finance sees both | `KNOWLEDGE.md` "Cobalt Harbor", Billing export; resume: "Built the billing export used by every downstream finance tool" |
 | Tracing across six services; retry loop doubling database load | `KNOWLEDGE.md` "Cobalt Harbor", Tracing; resume: "used it to find a retry loop that had been doubling database load since launch" |
-| Removed the client's retry, kept the server's | `KNOWLEDGE.md` "Cobalt Harbor", Tracing |
+| Removed the client's retry | `KNOWLEDGE.md` "Cobalt Harbor", Tracing |
 | Plan the migration first, measure first, leave a document | A summary of the checklist, the tracing work and the search runbook, each traced above; it adds no new fact |
 | Search service: unowned, p99 halved, full-text scan, two engineers | `KNOWLEDGE.md` "Cobalt Harbor", Search service; resume: "cut its p99 latency by half by removing an accidental full-text scan" |
 
