@@ -1,6 +1,6 @@
 ---
 name: cover-letter
-description: "Takes a posting and produces a sendable cover letter plus its application file: audits the application form first, picks or inverts a base letter, drafts from KNOWLEDGE.md and the live resume only, then dispatches the resume-kit:letter-reader agent to read it cold before the user sees it. Use for /cover-letter <url>, \"write a cover letter for this posting\", \"draft a letter for X\", or any request to produce a letter for a named role, even without the words \"cover letter\"."
+description: "Takes a posting and produces a sendable cover letter plus its application file: audits the application form first, picks a base letter and reorders its paragraphs to the posting, drafts from KNOWLEDGE.md and the live resume only, then dispatches the resume-kit:letter-reader agent to read it cold before the user sees it. Use for /cover-letter <url>, \"write a cover letter for this posting\", \"draft a letter for X\", or any request to produce a letter for a named role, even without the words \"cover letter\"."
 ---
 
 # cover-letter
@@ -81,9 +81,9 @@ List every question the form asks, marking which are required. Then:
   otherwise. When the posting came as a file with no HTML, say the scan
   could not run and why.
 
-## 3. Pick the base, and decide whether to invert
+## 3. Pick the base, and decide its paragraph order
 
-The bases are the files matching `applications/*base*-cover-letter.md` in
+The bases are the files matching `applications/*-base-*-cover-letter.md` in
 the content folder. **Read every one.** This skill holds no list of them,
 because a list goes stale the day a base is added and a session that
 trusts it never sees the new one.
@@ -180,7 +180,9 @@ stale when the base changed, and told later sessions to reintroduce a
 closing the user had already rejected; a sentence that lives in a file
 goes stale silently when it is also written somewhere else. Then the
 user's name, email and phone, each on its own line, with no sign-off word
-before them.
+before them. The builder reads the first line of that last block as the
+name and every line after it as one contact line, kept whole, so a phone
+written `(512) 555-0142` or a profile URL stays as typed.
 
 ## 7. Measure the letter, and hold the bar
 
@@ -206,7 +208,7 @@ ${CLAUDE_PLUGIN_ROOT}/skills/cover-letter/bin/build-letter --words applications/
 ```
 
 More than 42 words over the bar: cut before the reader sees it. 42 is the
-margin the original reader used (443 and 485). Cut from the paragraphs
+margin the original reader used. Cut from the paragraphs
 carrying the overage, never from the paragraph aimed most directly at the
 posting's stated requirements.
 
@@ -235,7 +237,7 @@ else. `words:` is the line step 7 printed for the draft, verbatim, and
     resume: <absolute path to the live content YAML>
     knowledge: <absolute path to KNOWLEDGE.md>
     bar: <the chosen base letter's word total>, from <the base's file name>
-    words: <total>, by paragraph <n>/<n>/<n>/<n>
+    words: <total>, by paragraph <greeting n>/<one n per block>/.../<signature n>
     today: <YYYY-MM-DD>
 
 ## 9. Relay the report unedited, but fix what is yours to fix
@@ -319,7 +321,10 @@ ${CLAUDE_PLUGIN_ROOT}/skills/cover-letter/bin/build-letter applications/<the fil
 ```
 
 The send-ready copy goes to an output folder outside the content folder,
-named with a trailing `/`, where the builder writes
+named with a trailing `/`. The builder expands a leading `~`, then refuses,
+with an error and nothing written, any `-o` that resolves inside the
+folder the session runs from or inside the letter's own folder; a relative
+`-o` always does. In the folder it writes
 `<Name> Cover Letter.pdf`, because the filename is the first thing a
 recruiter sees:
 

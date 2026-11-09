@@ -1,6 +1,6 @@
 """Tests for the cover-letter skill's invented example folder.
 
-The skill finds a base letter by the glob `applications/*base*-cover-letter.md`
+The skill finds a base letter by the glob `applications/*-base-*-cover-letter.md`
 and points a user with no base of their own at this one, and the letter
 reader traces claims against this KNOWLEDGE.md. These tests break if the base
 is renamed out of the glob, its signature stops parsing, its header loses the
@@ -11,7 +11,7 @@ import importlib.machinery
 import importlib.util
 import re
 import unittest
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -24,6 +24,7 @@ loader.exec_module(build_letter)
 
 EXAMPLES = PLUGIN / "skills" / "cover-letter" / "examples"
 BASE = EXAMPLES / "applications" / "2026-01-12-base-backend-engineer-cover-letter.md"
+BASE_GLOB = "applications/*-base-*-cover-letter.md"
 SAMPLE_RESUME = PLUGIN / "skills" / "resume" / "examples" / "sample-resume.yaml"
 
 
@@ -32,7 +33,15 @@ class BaseLetterTests(unittest.TestCase):
         self.text = BASE.read_text(encoding="utf-8")
 
     def test_the_lookup_glob_finds_exactly_the_one_base(self):
-        self.assertEqual(sorted(EXAMPLES.glob("applications/*base*-cover-letter.md")), [BASE])
+        self.assertEqual(sorted(EXAMPLES.glob(BASE_GLOB)), [BASE])
+
+    def test_the_lookup_glob_skips_companies_and_roles_containing_base(self):
+        for name in [
+            "2026-02-01-coinbase-backend-engineer-cover-letter.md",
+            "2026-02-01-northwind-database-engineer-cover-letter.md",
+        ]:
+            with self.subTest(name=name):
+                self.assertFalse(PurePosixPath("applications", name).match(BASE_GLOB))
 
     def test_the_letter_parses_with_the_example_signature(self):
         section, error = build_letter.letter_section(self.text)

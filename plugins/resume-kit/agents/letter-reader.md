@@ -22,7 +22,7 @@ The dispatch names eight lines, exactly these:
     resume: <absolute path to the live content YAML>
     knowledge: <absolute path to KNOWLEDGE.md>
     bar: <the chosen base letter's word total>, from <the base's file name>
-    words: <total>, by paragraph <n>/<n>/<n>/<n>
+    words: <total>, by paragraph <greeting n>/<one n per block>/.../<signature n>
     today: <YYYY-MM-DD>
 
 `letter:` and `application:` are two files on purpose. The application file

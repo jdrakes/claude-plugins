@@ -216,12 +216,15 @@ inventing a gap list.
 
 **`cover-letter`** (`resume-kit:cover-letter`) takes a posting. It audits the
 application form first, picks a base letter from
-`applications/*base*-cover-letter.md`, drafts from `KNOWLEDGE.md` and the
+`applications/*-base-*-cover-letter.md`, drafts from `KNOWLEDGE.md` and the
 live resume only, measures the draft against the base's own length,
 dispatches `resume-kit:letter-reader`, and renders the `## Letter` section
 alone to PDF with the resume's fonts. A review build goes to the temp
 folder; the send-ready copy goes to an output folder you name with `-o`, as
-`<Name> Cover Letter.pdf`. It never writes a PDF into your content folder.
+`<Name> Cover Letter.pdf`. It never writes a PDF into your content folder:
+it expands a leading `~` in `-o`, then refuses any `-o` that resolves
+inside the folder it runs from or inside the letter's folder, so a
+relative `-o` is always refused.
 
 **`resume-writer`** is the subagent `resume` dispatches to turn
 `KNOWLEDGE.md` facts into bullets for one role, writing only to a draft. A
@@ -248,7 +251,7 @@ fixed path.
 | A content YAML | The source of what the resume says; the skill never reads the PDF for this |
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
-| `applications/` with at least one base letter named `*base*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
+| `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
 | An optional `CLAUDE.md` in the content folder | `cover-letter` reads the live resume's file name, the content rules and any writing-style skill to invoke from it |
 
 A posting is optional and always supplied as a file you name: `resume-review`

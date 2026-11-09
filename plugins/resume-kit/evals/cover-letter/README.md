@@ -89,6 +89,11 @@ From the plugin directory, with `P` set to its absolute path:
 
 2026-11-08, opus, bar 408 (base `2026-01-12-base-backend-engineer-cover-letter.md`).
 
+After this run the shipped base was fixed so its own claims trace to the
+example record, and it now measures 410. The cases were not rerun against
+it; at 410 they still meet their rows: `letter-good.md` is 26 over, inside
+the 42-word margin, and `letter-broken.md` is 144 over, more than 100.
+
 - `letter-good.md`, 436 words: **pass.** Verdict interview; no untraceable claim; the hook not raised, closed by ruling 2; one stance item.
 - `letter-broken.md`, 554 words: **pass.** Length reported as a finding, 146 over; the incident response and postmortem reported untraceable and contradicted by `## Not on file`; "Lakeside Freight's move to event sourcing" reported untraceable, and "is what made me apply" reported as author-confirmation required; the confirmed hook not raised again.
 
