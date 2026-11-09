@@ -3,7 +3,9 @@
 # each with a command that installs it on a Mac.
 #
 #   typst      every PDF build
-#   pdftotext  from poppler: build-variant's check that removed text is gone
+#   pdftotext  from poppler: the read of bullet length and tense before
+#              every send-ready build, and build-variant's check that
+#              removed text is gone
 #   python3    with PyYAML: a send-ready build into a folder, build-variant
 #              and resume-assessment's tools
 #
