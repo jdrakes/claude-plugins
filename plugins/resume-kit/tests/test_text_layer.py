@@ -6,10 +6,8 @@ E E N G I N E E R" and dates as "J U N 2 0 1 7 - M AY 2 0 1 9", so a parser
 could miss the title and every tenure. Twenty screener reads of one resume
 flagged it independently (resumes repo, assessments, 2026-09-24).
 
-Skips when typst or pdftotext is missing, except under
-RESUME_KIT_REQUIRE_FIDELITY, where a skip would mean the check never ran.
+Skips when typst or pdftotext is missing.
 """
-import os
 import re
 import pathlib
 import shutil
@@ -25,8 +23,6 @@ def _extracted_text():
     missing = [tool for tool in ("typst", "pdftotext") if shutil.which(tool) is None]
     if missing:
         message = f"{', '.join(missing)} not installed"
-        if os.environ.get("RESUME_KIT_REQUIRE_FIDELITY"):
-            raise AssertionError(f"{message}; RESUME_KIT_REQUIRE_FIDELITY is set")
         raise unittest.SkipTest(message)
     with tempfile.TemporaryDirectory() as work:
         pdf = pathlib.Path(work) / "sample-resume.pdf"

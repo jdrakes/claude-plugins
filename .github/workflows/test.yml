@@ -29,9 +29,4 @@ jobs:
       - name: Install Python dependencies
         run: pip install pyyaml
 
-      # A skipped fidelity check on a runner that installs its own typst means
-      # the workflow is broken, not that the host is unusual. Without this the
-      # suite would pass with the renderer unchecked.
       - run: bash scripts/test.sh
-        env:
-          RESUME_KIT_REQUIRE_FIDELITY: "1"

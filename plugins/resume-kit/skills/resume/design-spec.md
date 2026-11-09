@@ -248,11 +248,10 @@ on the host's installed fonts, and the fix for that is `bin/build`'s
 `--ignore-system-fonts`, which is already there because that regression
 happened once.
 
-**The baseline is pinned to typst 0.15.1.** Page geometry is a function of
-the renderer version; a different version renders differently and that is not
-a regression. `check-fidelity.sh` reads `typst --version` and skips with a
-message rather than failing when it does not match. Moving to a new typst
-means regenerating:
+**The baseline was generated on typst 0.15.1 and verified on 0.14.2 to
+0.15.1.** Those versions render the fixture with identical geometry, so the
+check runs on whatever typst is installed. When a typst release moves the
+geometry the check fails; if the move is deliberate, regenerate:
 
 ```sh
 tools/check-fidelity.sh --update    # rewrite the baseline from this render

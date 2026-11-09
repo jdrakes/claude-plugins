@@ -217,8 +217,9 @@ A posting is optional and always supplied as a file you name: `resume-review`
 reads it for its second pass, and `resume-assessment` reads one posting per
 line from a market file for its gap list. Neither fetches a posting itself.
 
-Toolchain: **typst 0.15.1** (the version the snapshot baseline in `resume`
-is pinned to), `pdftotext` from poppler, and `python3` with `pyyaml`.
+Toolchain: **typst** (the snapshot baseline in `resume` was generated on
+0.15.1 and verified on 0.14.2, 0.15.0 and 0.15.1), `pdftotext` from
+poppler, and `python3` with `pyyaml`.
 
 ### The renderer
 
@@ -228,12 +229,14 @@ spacing, and why each one holds the number it does. It is what makes the
 renderer editable rather than magic.
 
 `tools/check-fidelity.sh` is the only check in the kit that looks at the
-rendered page rather than the source. It is a **self-snapshot** pinned to
-typst 0.15.1, not a comparison against another renderer's golden reference:
+rendered page rather than the source. It is a **self-snapshot** generated
+on typst 0.15.1, not a comparison against another renderer's golden reference:
 it renders the shipped example fixture and compares that render elementwise
 against a committed baseline of its own previous render, failing on any
 line whose text, page, column or position moved. Run it after any edit to
-`template.typ` or `components.typ`.
+`template.typ` or `components.typ`. It runs on whatever typst is installed;
+when a typst release moves the geometry the check fails, and `--update`
+regenerates the baseline.
 
 Two genuine regressions caught over this check's life: a render that
 silently depended on the host's installed fonts, fixed with
