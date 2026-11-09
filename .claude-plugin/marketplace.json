@@ -17,6 +17,13 @@
       "author": { "name": "James Drakes" },
       "category": "productivity",
       "source": "./plugins/resume-kit"
+    },
+    {
+      "name": "purchase-research",
+      "description": "A repeatable method for researching and deciding on purchases: name the real constraint first, compare on 1- and 3-year cost, and log each decision to one file whose frontmatter says its status.",
+      "author": { "name": "James Drakes" },
+      "category": "productivity",
+      "source": "./plugins/purchase-research"
     }
   ]
 }

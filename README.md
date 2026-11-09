@@ -1,8 +1,9 @@
 # claude-plugins
 
-A marketplace of two plugins: `plan-build`, an agent workflow for planning
-and building software changes, and `resume-kit`, an opinionated resume
-toolkit.
+A marketplace of three plugins: `plan-build`, an agent workflow for
+planning and building software changes, `resume-kit`, an opinionated
+resume toolkit, and `purchase-research`, a method for researching a
+purchase and logging each decision.
 
 ## Install
 
@@ -10,6 +11,7 @@ toolkit.
 /plugin marketplace add jdrakes/claude-plugins
 /plugin install plan-build@jdrakes
 /plugin install resume-kit@jdrakes
+/plugin install purchase-research@jdrakes
 ```
 
 The old `jdrakes/claude-plan-build` URL still resolves, through GitHub's
@@ -306,3 +308,49 @@ never fails a build: it exits 0 whenever it ran and prints a report for you
 to read, not a verdict.
 
     python3 tools/calibrate.py reference.pdf generated.pdf
+
+## purchase-research
+
+A repeatable method for researching and deciding on a purchase, and a log
+format that keeps one file per decision.
+
+### The opinions
+
+These are the argument. If you disagree with them, the plugin is not for
+you.
+
+1. **The shape of the conversation, not a script.** Skip a step already
+   covered. (`purchase-research` opening)
+2. **The real constraint reframes every comparison**, so it is named before
+   models are compared. (`purchase-research` step 2)
+3. **Total cost over 1 and 3 years**, with real prices and replacement
+   cycles, not sticker price. (`purchase-research` step 3)
+4. **One file per decision**, created at the first real constraint and
+   reused, with the reasoning committed alongside each change.
+   (`purchase-research` step 9)
+5. **Status is read from which frontmatter fields are present** (`hold`,
+   `decided`, `bought`, `reassess`); a field with no value is omitted,
+   never `null`. (`purchase-research` The log file)
+6. **A running tally of decided versus open**, so "what's left" has a
+   direct answer. (`purchase-research` Throughout)
+
+### What is in it
+
+**`purchase-research`** (`purchase-research:purchase-research`) runs the
+nine-step method: start broad, name the real constraint, use real numbers
+and 1- and 3-year cost, map to the buyer's situation, settle close calls,
+revisit earlier picks, stage multi-item buys, say whether to consolidate,
+and log the decision. It writes one markdown file per decision to the log
+directory, and commits each change when that directory is inside a git
+repository. `skills/purchase-research/examples/standing-desk-home-office.md`
+is an invented, filled-in entry.
+
+### What your project needs to provide
+
+| Requirement | Why |
+|---|---|
+| A log directory, named by you, by your project's `CLAUDE.md`, or by a skill of your own that invokes this one | Every decision is logged there; with none named, the skill asks once before writing the first file |
+| Optional: the log directory inside a git repository | Each change to a decision file is then committed with its reasoning, so `git log -p` is the decision's history |
+
+To fix the log directory once, write a small skill of your own whose body
+names the directory and invokes `purchase-research:purchase-research`.
