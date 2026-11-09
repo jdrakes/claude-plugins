@@ -1,0 +1,74 @@
+# Your resume's content. resume-kit's template decides how the page looks;
+# this file decides only what it says. Everything below is an invented
+# example for Alex Rivera: replace each value with your own, from facts
+# you have recorded in KNOWLEDGE.md.
+#
+# name, title and summary are required. Every other section is optional:
+# leave one out, or empty, and its heading disappears from the page.
+#
+# Ask Claude to build it with resume-kit's resume skill. A review build
+# goes to your temp folder, never into this folder.
+
+name: Alex Rivera
+title: Senior Software Engineer       # the line under the name
+
+# >- keeps the summary one paragraph however it is wrapped here.
+summary: >-
+  Backend engineer with eight years on order and billing services. Builds
+  the parts of a system that are expensive to change later: schemas, queues
+  and the migrations between them.
+
+# Sidebar. A plain string renders as text; a {text, link} pair renders as
+# an underlined link.
+details:
+  - Portland, Oregon
+  - text: (555) 0142
+    link: tel:5550142
+  - text: alex.rivera@example.com
+    link: mailto:alex.rivera@example.com
+
+links:                                # always {text, link}
+  - text: Portfolio
+    link: https://example.com/alex-rivera
+  - text: Source
+    link: https://example.com/alex-rivera/code
+
+skills:
+  - Python
+  - PostgreSQL
+  - Event-driven systems
+  - Schema migration
+
+hobbies:
+  - Cycling
+
+# Main column. Each title line renders as "role, company, location", and
+# location is optional. The date line puts the template's own separator
+# between start and end, so do not write one. Leave end blank for a
+# current role. Write dates as they should appear, such as MAR 2022.
+experience:
+  - role: Senior Software Engineer
+    company: Example Corp
+    location: Portland, Oregon
+    start: MAR 2022
+    end:                              # blank: current role
+    bullets:
+      - Built the order service that 40 internal teams call to place and
+        track orders, replacing three copies of the same logic.
+      - Moved invoice generation from a nightly batch to an event queue, so
+        a customer's invoice arrives within a minute of the order.
+
+  - role: Software Engineer
+    company: Sample Labs
+    location: Remote
+    start: JUN 2018
+    end: FEB 2022
+    bullets:
+      - Designed the schema migration process every database change at
+        Sample Labs now follows, from backfill to the order of the two
+        deploys.
+
+education:
+  - degree: Bachelor of Science in Computer Science
+    school: University of Example
+    year: 2018

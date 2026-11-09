@@ -1,6 +1,6 @@
 ---
 name: resume
-description: "Builds and edits the user's resume. Use whenever they want to change a bullet, role, skill, summary or contact detail, produce a PDF to send, or ask anything about what their resume says, even if they do not say resume."
+description: "Builds and edits the user's resume. Use whenever they want to change a bullet, role, skill, summary or contact detail, produce a PDF to send, start a new resume folder, or ask anything about what their resume says, even if they do not say resume."
 ---
 
 # resume
@@ -18,7 +18,7 @@ output and may be older than the content.
 Two roots, and they are not interchangeable.
 
 - Everything this plugin ships sits under `${CLAUDE_SKILL_DIR}`:
-  `${CLAUDE_SKILL_DIR}/bin/build`, `template.typ`, `components.typ`,
+  `${CLAUDE_SKILL_DIR}/bin/build`, `${CLAUDE_SKILL_DIR}/bin/new-content-folder` and its `starter/`, `template.typ`, `components.typ`,
   `design-spec.md`, `content-rules.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
 - Everything the user owns sits in the current working directory: the
   content YAML, `KNOWLEDGE.md`, `drafts/` and `CLAUDE.md`.
@@ -43,6 +43,21 @@ name is the first thing a recruiter sees. The builder expands a leading
 `~`, then refuses, with nothing written, any `-o` inside the folder the
 session runs from or inside the content file's folder; a relative `-o`
 always is.
+
+## Starting a content folder
+
+When the user has no content folder yet, create one where they say:
+
+```sh
+${CLAUDE_SKILL_DIR}/bin/new-content-folder <folder>
+```
+
+It refuses a folder that exists and is not empty. It writes
+`resume-v1.yaml` (invented example content for Alex Rivera, to replace), an
+empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` that says where
+the user's own content rules go and asks for their send folder. Then tell
+the user to start Claude Code from that folder, since every skill resolves
+its files against the folder it runs from.
 
 ## Agent names
 

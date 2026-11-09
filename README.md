@@ -268,6 +268,8 @@ Run every resume-kit skill from your resume directory; each one resolves
 its working files against the directory the session is started in, not a
 fixed path.
 
+`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder.
+
 | Requirement | Why |
 |---|---|
 | A content YAML | The source of what the resume says; the skill never reads the PDF for this |
