@@ -385,6 +385,20 @@ Word counts across the two edits tried:
 | --- | --- | --- |
 | `## Replies` and the 120-word bullet only | 31 | 258, with a table of findings and a list of files |
 | Plus: fixes recorded in the application file, one line in chat, no tables | 79 | 136, with a five-line "Letter status" list and a three-line file list |
+| Plus: no file list, one line saying where the draft PDF is | 30 | 152, with no file list but a three-line list of fixes, a line on the letter's length and a paragraph on the weakest point |
+
+Rerun after the third edit, 2026-11-09, opus, both runs. No permission
+denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| LUM-66 checks | **pass.** Hook and approval asked in reply 1 with the drafted letter, no "cannot write", no `applications/` after run 1, `2026-11-09-base-program-operations-cover-letter.md` with "- Approved: Dana Whitfield, 2026-11-09" and the Columbus Youth Arts Alliance letter with the hook word for word and `## Evidence` after run 2, and reply 2 reports the cold read: "A cold read flagged three wording problems, and I fixed all three" |
+| Under 120 words | **fail.** Reply 1: 30 words. Reply 2: 152 words. The file list is gone; the reply spent the words elsewhere |
+| No plugin path | **pass.** The grep printed nothing |
+| No machinery words | **pass.** None of the five appears in either reply |
+
+Reply 2 names one file path, the draft PDF in the system temp folder,
+and `KNOWLEDGE.md` as where the reason for applying went.
 
 ## LUM-71: the automatic review waits for known gaps
 

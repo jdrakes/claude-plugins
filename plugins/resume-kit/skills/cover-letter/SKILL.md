@@ -358,6 +358,9 @@ A review build writes to the system temp folder and prints the path:
 ${CLAUDE_PLUGIN_ROOT}/skills/cover-letter/bin/build-letter applications/<the file>.md
 ```
 
+In chat, that path is the one file the reply names, on one line: "The
+draft PDF is at <path>." Do not list the letter or the base beside it.
+
 The send-ready copy goes to an output folder outside the content folder,
 named with a trailing `/`. The builder expands a leading `~`, then refuses,
 with an error and nothing written, any `-o` that resolves inside the
@@ -406,4 +409,6 @@ letter is sendable and `## Confirm before sending` is empty.
   step 9, comes to under 120 words, not counting letter text shown
   below it. That count covers everything else in the reply: the
   decisions, the cold read's result, the fixes and where files went.
-  No tables of findings or files; those are in the application file.
+  No tables of findings and no list of files. The application file
+  already records the letter and the base it used, so the reply names
+  one file only: one line saying where the PDF is.
