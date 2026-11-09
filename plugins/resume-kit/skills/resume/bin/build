@@ -3,13 +3,19 @@
 # invocation lives - it used to be duplicated verbatim across three docs,
 # which drifted independently.
 #
+# No rendered PDF is written into the content folder, which is usually a
+# repository. A review build goes to the temp folder; a send-ready copy goes
+# where -o says, and an -o inside the current folder, the content file's
+# folder or, for a draft, the folder that holds drafts/ is refused.
+#
 # Usage:
-#   bin/build <content.yaml>              -> <content>.pdf, next to the content file
-#   bin/build <content.yaml> -o <out.pdf> -> override the output path
+#   bin/build <content.yaml>              review build, <temp>/<stem>.pdf
+#   bin/build <content.yaml> -o <folder>/ "<name> Resume.pdf" in <folder>
+#   bin/build <content.yaml> -o <out.pdf> PDF at <out.pdf>
 set -euo pipefail
 
 usage() {
-  echo "usage: bin/build <content-file> [-o <output.pdf>]" >&2
+  echo "usage: bin/build <content-file> [-o <output.pdf or folder/>]" >&2
   exit 1
 }
 
@@ -55,12 +61,67 @@ resolve_path() {
 content="$(resolve_path "$content_arg")"
 [[ -f "$content" ]] || { echo "content file not found: $content" >&2; exit 1; }
 
+# Where an -o lands: a leading ~ expanded (a quoted "~/..." arrives here
+# unexpanded), resolved against the folder this was run from with symlinks
+# followed, named "<name> Resume.pdf" when it is a folder and resolved again
+# (a name can hold "../"), then refused when inside the current folder, the
+# content file's folder, or, for a content file in drafts/, the folder that
+# holds drafts/. A relative -o is therefore always refused. Python, because
+# resolving a path that does not exist yet is not portable between macOS and
+# Linux shells. Read into a variable rather than written as a heredoc inside
+# $( ), which bash 3.2 misparses when the code holds an apostrophe.
+read -r -d '' place_output <<'PYEOF' || true
+import os
+import sys
+
+def inside(path, folder):
+    # By file identity as well as by spelling: on a case-insensitive disk
+    # "Content" and "content" are one folder but two strings. The existing
+    # ancestors of path are compared, since path itself may not exist yet.
+    if os.path.commonpath([path, folder]) == folder:
+        return True
+    if not os.path.exists(folder):
+        return False
+    ancestor = path
+    while not os.path.exists(ancestor):
+        ancestor = os.path.dirname(ancestor)
+    while True:
+        if os.path.samefile(ancestor, folder):
+            return True
+        if os.path.dirname(ancestor) == ancestor:
+            return False
+        ancestor = os.path.dirname(ancestor)
+
+cwd, content, given = sys.argv[1:]
+path = os.path.realpath(os.path.join(cwd, os.path.expanduser(given)))
+if given.endswith("/") or os.path.isdir(path):
+    # Only the folder form reads the content, so a build with a file -o
+    # works without pyyaml.
+    import yaml
+    with open(content, encoding="utf-8") as handle:
+        data = yaml.safe_load(handle)
+    name = data.get("name") if isinstance(data, dict) else None
+    if not name:
+        sys.exit(f"no name in {content} to name the PDF by; give -o a file path")
+    path = os.path.realpath(os.path.join(path, f"{name} Resume.pdf"))
+content_folder = os.path.realpath(os.path.dirname(content))
+guarded = [(os.path.realpath(cwd), "the current folder"),
+           (content_folder, "the content file's folder")]
+if os.path.basename(content_folder) == "drafts":
+    guarded.append((os.path.dirname(content_folder), "the folder that holds drafts/"))
+for folder, label in guarded:
+    if inside(path, folder):
+        sys.exit(f"refusing to write {path}: it is inside {label}, {folder}")
+print(path)
+PYEOF
+
 if [[ -n "$output_arg" ]]; then
-  output="$(resolve_path "$output_arg")"
+  output="$(python3 -c "$place_output" "$orig_dir" "$content" "$output_arg")"
 else
-  # Default: the content file's own name with .pdf, next to the content file
-  # - the behavior the retired build.py had, that the raw typst command lost.
-  output="${content%.*}.pdf"
+  # Default: a review build, to the temp folder, never beside the content
+  # file. ${TMPDIR%/} because macOS sets TMPDIR with a trailing slash.
+  temp_folder="${TMPDIR:-/tmp}"
+  output="${temp_folder%/}/$(basename "${content%.*}").pdf"
 fi
 
 case "$output" in
@@ -69,6 +130,8 @@ case "$output" in
     exit 1
     ;;
 esac
+
+mkdir -p "$(dirname "$output")"
 
 # --root / and absolute paths for content, fonts, and template are required:
 # Typst sandboxes relative reads to its own project root (the template's own

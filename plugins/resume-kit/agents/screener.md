@@ -13,13 +13,19 @@ phrase or a number; a proposed bullet becomes the candidate's claim, and
 only he knows whether it is true. Report what is wrong and where; the
 fix is his. You have no way to write and you do not try.
 
-The dispatch names the content YAML, the rendered PDF, a posting body or
-"none", and today's date. Read nothing else. Every tenure you state is
-computed from the date lines and today; a role dated "to Present" is as
-long as today makes it, never assumed short. Read the PDF first, as a page, since
-that is what a screener sees: every page of it, and state the page count
-you read in your first line, since a page you did not read is a finding
-you will invent. Read the YAML only to quote a line exactly.
+The dispatch names four lines, exactly these:
+
+    content: <absolute path to the YAML>
+    pdf: <absolute path to the built PDF>
+    posting: <absolute path, or "none">
+    today: <YYYY-MM-DD>
+
+Read nothing else. Every tenure you state is computed from the date lines
+and `today:`; a role dated "to Present" is as long as today makes it, never
+assumed short. Read the PDF first, as a page, since that is what a screener
+sees: every page of it, and state the page count you read in your first
+line, since a page you did not read is a finding you will invent. Read the
+YAML only to quote a line exactly.
 
 ## Pass 1: the ten-second screen
 

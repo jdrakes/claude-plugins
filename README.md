@@ -209,7 +209,10 @@ YAML file you own; the skill ships one layout fixture and never a resume of
 its own. It reads the YAML to learn what a resume says, never the PDF,
 because a PDF is a build output and may be older than the content.
 Dispatches `resume-kit:resume-writer` to draft a role's section from facts
-in `KNOWLEDGE.md`, then `resume-kit:resume-review` on the result.
+in `KNOWLEDGE.md`, then `resume-kit:resume-review` on the result. A review
+build with no `-o` goes to the temp folder; a send-ready copy goes to a folder
+you name with `-o <folder>/`, as `<Name> Resume.pdf`, and an `-o` inside your
+content folder is refused, so no PDF is written into it.
 
 **`resume-facts`** interviews you about one role, card by card, through
 `AskUserQuestion`, and records what you say in `KNOWLEDGE.md`. It writes
@@ -253,11 +256,22 @@ rewrites and never proposes a bullet.
 reads the letter cold as a hiring manager would, then traces every claim,
 and never proposes a sentence.
 
+**Content rules.** `skills/resume/content-rules.md` holds the default rules
+for what a resume or a letter says: where a fact may come from, how a past
+employer is described, what a page that does not fit gives up first, and
+drafting before the live file changes. `resume-writer` and `letter-reader`
+get its path in their dispatch, with your content folder's `CLAUDE.md`. The
+`## Content rules` section there holds your own rules: they add to the
+defaults, and yours win where they contradict one. `screener` gets neither:
+it reads the page as a recruiter would, without the writer's rules.
+
 ### What your project needs to provide
 
 Run every resume-kit skill from your resume directory; each one resolves
 its working files against the directory the session is started in, not a
 fixed path.
+
+`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder.
 
 | Requirement | Why |
 |---|---|
@@ -265,7 +279,7 @@ fixed path.
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
 | `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
-| An optional `CLAUDE.md` in the content folder | `cover-letter` reads the live resume's file name, the content rules and any writing-style skill to invoke from it |
+| An optional `CLAUDE.md` in the content folder | Its `## Content rules` section adds to resume-kit's default content rules and wins where it contradicts one. `cover-letter` also reads the live resume's file name, any writing-style skill to invoke and the send folder from it |
 
 A posting is optional and always supplied as a file you name: `resume-review`
 reads it for its second pass, and `resume-assessment` reads one posting per

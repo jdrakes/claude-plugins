@@ -52,6 +52,10 @@ found". The message is exactly these lines, nothing else:
     posting: <absolute path, or "none">
     today: <YYYY-MM-DD>
 
+The screener is not given the content rules. A recruiter does not know
+the writer's rules, and with them the screener read harsher without
+finding a new reason.
+
 ## 3. Relay
 
 Give the report back as the screener wrote it. Do not soften it, add

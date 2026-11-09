@@ -24,31 +24,32 @@ The parts of a system that are hard to change later are the parts I like
 working on.
 
 The split worked because of a read-only compatibility view. It kept the old
-table's name and columns and joined across the four new services, so each
-team moved when its own release allowed, over about five months, and the
-view was dropped when the last caller left. Afterwards I wrote the
-schema-change checklist the team now follows for every change: backfill,
-dual writes, the read switch, and which of the two deploys goes first. I
-also rewrote our nightly reconciliation job as a consumer of the
-change-data-capture stream, which took the run from four hours to under ten
-minutes and ended the overnight rota that existed only to restart it.
+table's name and columns and joined across the four new services, so a
+caller that only read orders kept working unchanged and each team moved
+when its own release allowed, over about five months, and the view was
+dropped when the last caller left. Afterwards I wrote the schema-change
+checklist the team now follows for every change: backfill, dual writes,
+the read switch, and which of the two deploys goes first. I also rewrote
+our nightly reconciliation job as a consumer of the change-data-capture
+stream, so each change is reconciled as it arrives and the nightly run,
+which now checks only what is left, went from four hours to under ten
+minutes.
 
 At Cobalt Harbor I built the billing export every finance tool read from.
 A corrected invoice is reissued as a new record pointing at the one it
 replaces, so history is never edited and finance can see both the
 original and the correction. I added distributed tracing across six
-services and used it to find a client retrying every failed write while
-the server retried too, which had doubled database load since launch. I
-removed the client's retry. I also took over a
-search service nobody owned, halved its p99 latency by removing a
-full-text scan that a filter triggered on every query, and documented it
-well enough that two other engineers have since taken on-call for it.
+services and used it to halve database load, by removing one client's
+retry of failed writes and leaving retries to the server. I also took on
+the search service and halved its p99 latency by changing how one query
+filter uses its index.
 
-The habit behind both jobs is the same: plan the migration before the
-schema, measure before changing the hot path, and leave the next engineer
-a document they can act on without me. Your posting says no carrier can be
-asked to switch on the same day as every other; a compatibility view over
-the shipment-tracking database is where I would start. I am applying
+In both jobs I left documents other engineers work from: the
+schema-change checklist at Northwind, and at Cobalt Harbor the search
+service's runbook and design note, which let two other engineers take a
+share of the service. Your posting says no carrier can be asked to switch
+on the same day as every other; a compatibility view over the
+shipment-tracking database is where I would start. I am applying
 because I want my next migration to be one where a mistake shows up at a
 loading dock, not in a report.
 
@@ -62,9 +63,9 @@ alex.rivera@example.com
 ## Rulings
 
 1. **Rulings 1 to 4 of the base stand** (Alex, 2026-01-12). "The work I am
-   proudest of" stays cut, "ended the overnight rota" stays, the
-   tenant-isolation rollout stays out, and the closing asks for half an
-   hour.
+   proudest of" stays cut, the reconciliation sentence says what the
+   rewrite does, the tenant-isolation rollout stays out, and the closing
+   asks for half an hour.
 2. **The hook is Alex's, in Alex's words** (Alex, 2026-01-20). "I am
    applying because I want my next migration to be one where a mistake
    shows up at a loading dock, not in a report." Alex gave this reason
@@ -84,10 +85,10 @@ None.
 | --- | --- | --- |
 | Lead the split of the shipment-tracking database, each carrier moving on its own schedule | Orders table split, seventeen callers, compatibility view | Strong |
 | Correctness of invoicing data, how a corrected invoice is recorded | Billing export and its replay path; nightly reconciliation | Strong |
-| APIs that stay correct when a carrier is slow, retries or goes down | Client and server retry loop found by tracing; per-tenant rate limits | Medium: the retry fix is about one client, not an API design |
+| APIs that stay correct when a carrier is slow, retries or goes down | Database load halved by removing one client's retry, found by tracing; per-tenant rate limits | Medium: the retry fix is about one client, not an API design |
 | PostgreSQL at scale: schema changes, backfills, query performance | Schema-change checklist; search p99 halved | Strong |
-| Instrument services for on-call | Distributed tracing across six services | Medium |
-| Mentor engineers; write design notes others can act on | Search runbook and design note; two engineers took on-call | **Weakest.** The resume names technical mentoring as a skill but `KNOWLEDGE.md` holds no mentoring fact beyond the search handover. Prepare for the question; do not claim more in the letter |
+| Instrument services so a failure can be seen | Distributed tracing across six services | Medium |
+| Mentor engineers; write design notes others can act on | Search runbook and design note; two engineers took a share of the service | **Weakest.** The resume names technical mentoring as a skill but `KNOWLEDGE.md` holds no mentoring fact beyond the search handover. Prepare for the question; do not claim more in the letter |
 
 ## Evidence
 
@@ -95,12 +96,13 @@ None.
 | --- | --- |
 | Nine years on data-heavy backend services; schemas, queues, paths that stay correct when a dependency is slow | Resume summary |
 | Split the table that took every write in the company into four services; seventeen callers, none releasing on the same day | `KNOWLEDGE.md` "Northwind Systems", Orders table split; resume bullet 1 |
-| The view kept the name and columns; about five months; view dropped | `KNOWLEDGE.md` "Northwind Systems", Orders table split |
+| The view kept the name and columns; a caller that only read orders kept working unchanged; about five months; view dropped | `KNOWLEDGE.md` "Northwind Systems", Orders table split |
 | Schema-change checklist and its steps | `KNOWLEDGE.md` "Northwind Systems", Schema-change checklist |
-| Reconciliation, four hours to under ten minutes, rota ended | `KNOWLEDGE.md` "Northwind Systems", Nightly reconciliation; base ruling 2 |
+| Reconciliation on the change-data-capture stream, four hours to under ten minutes | `KNOWLEDGE.md` "Northwind Systems", Nightly reconciliation; base ruling 2 |
 | Billing export; reissue without editing history | `KNOWLEDGE.md` "Cobalt Harbor", Billing export |
-| Tracing across six services; retry loop doubling database load; client retry removed | `KNOWLEDGE.md` "Cobalt Harbor", Tracing |
-| Search service: unowned, p99 halved, full-text scan, two engineers | `KNOWLEDGE.md` "Cobalt Harbor", Search service |
+| Tracing across six services; database load halved by removing one client's retry of failed writes, leaving retries to the server | `KNOWLEDGE.md` "Cobalt Harbor", Tracing |
+| Took on the search service; p99 halved by changing how one query filter uses its index | `KNOWLEDGE.md` "Cobalt Harbor", Search service |
+| Documents other engineers work from: the checklist; the search runbook and design note, two engineers taking a share of the service | `KNOWLEDGE.md` "Northwind Systems", Schema-change checklist; `KNOWLEDGE.md` "Cobalt Harbor", Search service |
 | No carrier can be asked to switch on the same day as every other | `posting.txt`, "About the role" |
 | The hook | Ruling 2 |
 

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Create a resume content folder from resume-kit's starter: a content YAML
+# with invented example content, an empty KNOWLEDGE.md, an empty drafts/,
+# and a CLAUDE.md that says where the user's own content rules go and asks
+# for their send folder.
+#
+# Usage:
+#   bin/new-content-folder <folder>
+#
+# The folder may be new or empty. A folder with anything in it, or a file
+# at that path, is refused, so nothing of the user's is ever overwritten.
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: bin/new-content-folder <folder>" >&2
+  exit 1
+fi
+
+# Computed from this script's own location, resolved through any plugin
+# symlink, as bin/build does.
+skill_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+starter="$skill_dir/starter"
+folder="$1"
+
+if [[ -e "$folder" && ! -d "$folder" ]]; then
+  echo "refusing: $folder exists and is not a folder" >&2
+  exit 1
+fi
+if [[ -d "$folder" && -n "$(ls -A "$folder")" ]]; then
+  echo "refusing: $folder is not empty" >&2
+  exit 1
+fi
+
+mkdir -p "$folder/drafts"
+cp "$starter/resume-v1.yaml" "$folder/resume-v1.yaml"
+cp "$starter/CLAUDE.template.md" "$folder/CLAUDE.md"
+: > "$folder/KNOWLEDGE.md"
+
+echo "created $folder: resume-v1.yaml, KNOWLEDGE.md, drafts/, CLAUDE.md"
+echo "next: start Claude Code in $folder, replace the example content, and name your send folder in CLAUDE.md"

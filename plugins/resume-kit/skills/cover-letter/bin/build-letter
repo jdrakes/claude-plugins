@@ -7,8 +7,8 @@ section reaches the page.
 
 No rendered PDF is written into the content folder, which is usually a
 repository: a review build goes to the temp folder, and the send-ready copy
-goes where -o says. An -o inside the current folder or the application
-file's folder is refused.
+goes where -o says. An -o inside the current folder, the application
+file's folder or, for a draft, the folder that holds drafts/ is refused.
 
 Usage:
   build-letter <application.md>              review build, <temp>/<stem>.pdf
@@ -84,26 +84,47 @@ def words_line(section):
     return f"{sum(counts)}, by paragraph {'/'.join(str(count) for count in counts)}"
 
 
+def inside(path, folder):
+    """Whether path is folder or under it, by spelling or by file identity.
+
+    Identity, because on a case-insensitive disk "Letters" and "letters" are
+    one folder but two strings. The existing ancestors of path are compared,
+    since path itself may not exist yet.
+    """
+    if path.is_relative_to(folder):
+        return True
+    if not folder.exists():
+        return False
+    existing = next(ancestor for ancestor in (path, *path.parents) if ancestor.exists())
+    return any(ancestor.samefile(folder) for ancestor in (existing, *existing.parents))
+
+
 def output_path(source, output_arg, name, cwd):
     """Where the PDF goes, as (path, error).
 
     No -o: the temp folder, so a review build never lands beside the
     application file. -o naming a folder (an existing directory, or a path
-    ending in /): `<name> Cover Letter.pdf` inside it, the send-ready name.
-    Anything else is the file path itself.
+    ending in /): `<name> Cover Letter.pdf` inside it, the send-ready name,
+    resolved again because a name can hold "../". Anything else is the file
+    path itself.
 
     -o is expanded (a quoted ~ reaches here unexpanded) and resolved against
-    cwd. An -o inside cwd or inside the source's folder is an error: both are
-    usually the content repository, and a relative -o always lands in cwd.
+    cwd. An -o inside cwd, the source's folder or, for a source in drafts/,
+    the folder that holds drafts/ is an error: those are usually the content
+    repository, and a relative -o always lands in cwd.
     """
     if output_arg is None:
         return Path(tempfile.gettempdir()) / f"{source.stem}.pdf", None
     given = (cwd / Path(output_arg).expanduser()).resolve()
     if output_arg.endswith("/") or given.is_dir():
-        given = given / f"{name} Cover Letter.pdf"
-    for folder, label in ((cwd.resolve(), "the current folder"),
-                          (source.parent.resolve(), "the application file's folder")):
-        if given.is_relative_to(folder):
+        given = (given / f"{name} Cover Letter.pdf").resolve()
+    source_folder = source.parent.resolve()
+    guarded = [(cwd.resolve(), "the current folder"),
+               (source_folder, "the application file's folder")]
+    if source_folder.name == "drafts":
+        guarded.append((source_folder.parent, "the folder that holds drafts/"))
+    for folder, label in guarded:
+        if inside(given, folder):
             return None, f"refusing to write {given}: it is inside {label}, {folder}"
     return given, None
 

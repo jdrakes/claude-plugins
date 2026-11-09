@@ -7,7 +7,7 @@ them is made up.
 ## Why these exist
 
 A skill that dispatches a reader can pass every structural check (the file
-exists, the dispatch names the right agent, the eight lines are there) and
+exists, the dispatch names the right agent, the ten lines are there) and
 still ship a reader that misses what it is for. The cover-letter skill once
 shipped on structural checks alone, and three defects survived that a
 single real dispatch would have exposed. These cases are that dispatch:
@@ -21,7 +21,7 @@ All paths are relative to the plugin directory.
 | --- | --- |
 | `evals/cover-letter/posting.txt` | An invented posting: Lakeside Freight, Staff Backend Engineer. Backend and data-service work only. It never mentions event sourcing |
 | `evals/cover-letter/letter-good.md` | An application file built from `skills/cover-letter/examples/applications/2026-01-12-base-backend-engineer-cover-letter.md` for that posting. Slots filled, under the bar plus 42, the hook confirmed by Alex in `## Rulings`, `## Confirm before sending` at `None.` |
-| `evals/cover-letter/letter-broken.md` | `letter-good.md` plus one added paragraph carrying two planted defects, and padding that takes the letter more than 100 words over the bar |
+| `evals/cover-letter/letter-broken.md` | The earlier `letter-good.md`, from before its sentences were brought in line with `skills/resume/content-rules.md`, plus one added paragraph carrying two planted defects, and padding that takes the letter more than 100 words over the bar. It still says the search service had no owner, that a retry loop doubled database load, and that the rewrite ended a rota and two engineers took on-call. Those sentences are left in on purpose: the reader may report them as content-rule findings |
 
 The two planted defects in `letter-broken.md`:
 
@@ -36,8 +36,16 @@ The two planted defects in `letter-broken.md`:
 
 | Case | Must report |
 | --- | --- |
-| `letter-good.md` | A Pass 1 verdict. **No** untraceable claim. No author-confirmation item for the hook the rulings already close |
-| `letter-broken.md` | The length as a finding. **Both** planted claims as untraceable; the second also as author-confirmation required |
+| `letter-good.md` | A Pass 1 verdict. **No** untraceable claim. **No** content-rule finding. No author-confirmation item for the hook the rulings already close |
+| `letter-broken.md` | The length as a finding. **Both** planted claims as untraceable; the second also as author-confirmation required. Content-rule findings for the on-call, rota and deficiency wording are allowed and expected |
+
+The content-rule expectation for `letter-good.md` rests on the clarified
+least-charitable rule in `skills/resume/content-rules.md`: a before and
+after number for the owner's own work passes ("from four hours to under
+ten minutes", "halve database load", "halved its p99 latency"), and a
+sentence describing the employer's system as broken or wasteful does not.
+A reader that flags one of those numbers as deficiency framing fails the
+good case.
 
 Both cases must leave settled `## Rulings` items alone. A reader that
 re-asks a confirmed question fails even when its other findings are right.
@@ -66,7 +74,7 @@ From the plugin directory, with `P` set to its absolute path:
 
 3. For each case, run `claude -p --plugin-dir "$P" --model opus` with a
    prompt saying: make exactly one Agent call with `subagent_type:
-   resume-kit:letter-reader` and the eight lines below as its whole
+   resume-kit:letter-reader` and the ten lines below as its whole
    message, then print the agent's report verbatim and nothing else.
 
    ```
@@ -75,6 +83,8 @@ From the plugin directory, with `P` set to its absolute path:
    posting: <P>/evals/cover-letter/posting.txt
    resume: <P>/skills/resume/examples/sample-resume.yaml
    knowledge: <P>/skills/cover-letter/examples/KNOWLEDGE.md
+   defaults: <P>/skills/resume/content-rules.md
+   own-rules: none
    bar: <bar>, from 2026-01-12-base-backend-engineer-cover-letter.md
    words: <the words line>
    today: <YYYY-MM-DD>
@@ -87,7 +97,107 @@ From the plugin directory, with `P` set to its absolute path:
 
 ## Last run
 
-2026-11-08, opus, bar 408 (base `2026-01-12-base-backend-engineer-cover-letter.md`).
+2026-11-09, opus, bar 403 (base `2026-01-12-base-backend-engineer-cover-letter.md`),
+after the second rewrite below. Both cases pass.
+
+Each case was run with the prompt on stdin, `--permission-mode default`
+and `--allowedTools "Agent" "Read" "Glob" "Grep"`. A first attempt that
+allowed only `Agent` returned no review: the reader's reads waited on a
+permission prompt that `claude -p` cannot answer, and it said so rather
+than guess.
+
+| Case | Words | Over the bar | Result |
+| --- | --- | --- | --- |
+| `letter-good.md` | 429 | 26 | **pass** |
+| `letter-broken.md` | 554 | 151 | **pass** |
+
+`letter-good.md`, against its row:
+
+| Expectation | Reported |
+| --- | --- |
+| A Pass 1 verdict | Interview |
+| No untraceable claim | "Untraceable: none" |
+| No content-rule finding | None. It names "four hours to under ten minutes" and "halve database load" as before and after figures for the author's own work, which the rule allows |
+| No author-confirmation item for the confirmed hook | None. It cites ruling 2 as confirming the hook as written |
+| Settled rulings left alone | Yes. Rulings 1 to 3 read and none re-asked |
+| Stance item for "the parts I like working on" | Reported, as expected |
+
+Its four Pass 1 findings are about structure: paragraph 4 buries the link
+to Lakeside and repeats the checklist; the mechanism covers callers that
+read but the claim is about writes; "I also took on the search service"
+reads like a resume line; the opening goes generic after sentence 2. In
+Pass 2 it marks the p99 claim traced, with a wording mismatch: the letter
+said "changing how one query filter uses its index" and `KNOWLEDGE.md`
+said "removing it" of a filter that ran a full-text scan.
+
+After this run, `KNOWLEDGE.md` was changed to record the fix the letters
+describe: Alex changed how one query filter uses its index, which cut p99
+latency by half. The letters now trace to the record as written. The
+cases were not rerun after that change. Two texts still say "full-text
+scan", and neither is the record a letter traces to:
+
+- `skills/resume/examples/sample-resume.yaml`, the layout fixture, which
+  this plan leaves alone.
+- The search-service sentence in `letter-broken.md`. A reader may now
+  report it as untraceable; that is another allowed finding, and the
+  case's planted defects are unchanged.
+
+`letter-broken.md`, against its row:
+
+| Expectation | Reported |
+| --- | --- |
+| Length as a finding | Finding 3: 151 over, past the 42-word tolerance |
+| Invented claim untraceable | "led the incident response" and "wrote the postmortem", each contradicted by `## Not on file` |
+| Unconfirmed motivation untraceable | "Lakeside Freight's move to event sourcing", not in the posting |
+| The same as author-confirmation required | "is what made me apply", with ruling 2 recording a different reason |
+| Settled rulings left alone | Yes. The confirmed hook is not raised; Pass 2 notes that ruling 1 settles "ended the overnight rota" from finding 5 |
+| Content-rule findings, allowed | Finding 4, least-charitable: "search service nobody owned", "had doubled database load since launch", "the overnight rota that existed only to restart it". Finding 5, on-call: "two other engineers have since taken on-call for it", "ended the overnight rota" |
+
+It also reports the application file contradicting itself (no Evidence
+row for paragraph 5, incident response listed as not used,
+`## Confirm before sending` at `None.`) and the stance item.
+
+Pass 1 findings that name a content rule: none in the good case; findings
+4 and 5 in the broken case, as above.
+
+A rerun on 2026-11-09 failed the good case on one content-rule finding:
+the least-charitable rule, quoting three phrases from the base letter,
+"writes retried by both a client and the server", "a full-text scan that
+a filter ran on every query" and "the nightly run, once four hours long".
+The owner decided the reading the rule now states: a before and after
+number for the owner's own work passes, and a sentence describing the
+employer's system as broken or wasteful does not. The base and
+`letter-good.md` now say what was built and its effect, with the number:
+tracing used to halve database load by removing one client's retry,
+p99 halved by changing how one query filter uses its index, and the
+nightly run going from four hours to under ten minutes. A clause the
+record holds, that a caller that only read orders kept working unchanged,
+keeps the base inside 400 to 450 words. The base measures 403, so
+`letter-good.md` at 429 is 26 over, and `letter-broken.md` at 554 is 151
+over. The broken case was not changed.
+
+On 2026-11-08 the reader was run with `defaults:` set to
+`skills/resume/content-rules.md` and the good case failed. It reported
+three content-rule findings and one untraceable claim, all in sentences
+that came from the base letter:
+
+- On-call and maintenance clauses: "two other engineers have since taken
+  on-call for it" and the overnight rota the reconciliation job ended.
+- Past-employer deficiency framing: a retry loop that "had doubled database
+  load since launch", and "a search service nobody owned".
+- Untraceable: "The habit behind both jobs is the same: plan the migration
+  before the schema, ...". No record supports "plan the migration before
+  the schema" or calls anything a habit.
+
+The base and `letter-good.md` were rewritten to say what was built and its
+effect, and the closing sentence now names the two documents the record
+holds (the schema-change checklist, the search runbook and design note).
+Base ruling 2 now records why the rota is left out. The base measures 401,
+so `letter-good.md` at 427 is 26 over, inside the 42-word margin, and
+`letter-broken.md` at 554 is 153 over, more than 100. The broken case was
+not changed.
+
+Earlier run, 2026-11-08, opus, bar 408 (base `2026-01-12-base-backend-engineer-cover-letter.md`), before the reader read the content rules:
 
 After this run the shipped base was fixed so its own claims trace to the
 example record, and it now measures 410. The cases were not rerun against

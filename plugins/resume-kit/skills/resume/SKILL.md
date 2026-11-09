@@ -1,6 +1,6 @@
 ---
 name: resume
-description: "Builds and edits the user's resume. Use whenever they want to change a bullet, role, skill, summary or contact detail, produce a PDF to send, or ask anything about what their resume says, even if they do not say resume."
+description: "Builds and edits the user's resume. Use whenever they want to change a bullet, role, skill, summary or contact detail, produce a PDF to send, start a new resume folder, or ask anything about what their resume says, even if they do not say resume."
 ---
 
 # resume
@@ -18,10 +18,10 @@ output and may be older than the content.
 Two roots, and they are not interchangeable.
 
 - Everything this plugin ships sits under `${CLAUDE_SKILL_DIR}`:
-  `${CLAUDE_SKILL_DIR}/bin/build`, `template.typ`, `components.typ`,
-  `design-spec.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
+  `${CLAUDE_SKILL_DIR}/bin/build`, `${CLAUDE_SKILL_DIR}/bin/new-content-folder` and its `starter/`, `template.typ`, `components.typ`,
+  `design-spec.md`, `content-rules.md`, and the scripts under `${CLAUDE_SKILL_DIR}/tools`.
 - Everything the user owns sits in the current working directory: the
-  content YAML, `KNOWLEDGE.md`, `drafts/`.
+  content YAML, `KNOWLEDGE.md`, `drafts/` and `CLAUDE.md`.
 
 Write the variable verbatim in every command. A relative path with no root
 resolves against the user's resume directory, where none of this plugin
@@ -30,8 +30,34 @@ exists.
 Build:
 
 ```sh
-${CLAUDE_SKILL_DIR}/bin/build <content.yaml> [-o <out.pdf>]
+${CLAUDE_SKILL_DIR}/bin/build <content.yaml>                     # review build
+${CLAUDE_SKILL_DIR}/bin/build <content.yaml> -o "<send folder>/"  # send-ready copy
 ```
+
+No rendered PDF is written into the content folder. With no `-o`, the PDF
+goes to the system temp folder and the path is printed. A send-ready copy
+goes to the send folder the content folder's `CLAUDE.md` names; when it
+names none, ask the user once. With a trailing `/`, `-o` writes
+`<name> Resume.pdf` there, from the content's `name:`, because the file
+name is the first thing a recruiter sees. The builder expands a leading
+`~`, then refuses, with nothing written, any `-o` inside the folder the
+session runs from or inside the content file's folder; a relative `-o`
+always is.
+
+## Starting a content folder
+
+When the user has no content folder yet, create one where they say:
+
+```sh
+${CLAUDE_SKILL_DIR}/bin/new-content-folder <folder>
+```
+
+It refuses a folder that exists and is not empty. It writes
+`resume-v1.yaml` (invented example content for Alex Rivera, to replace), an
+empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` that says where
+the user's own content rules go and asks for their send folder. Then tell
+the user to start Claude Code from that folder, since every skill resolves
+its files against the folder it runs from.
 
 ## Agent names
 
@@ -51,10 +77,17 @@ exists. Confirm `KNOWLEDGE.md` holds interview facts for the role, else run
     draft: <absolute path to the draft YAML>
     role: <role, company, dates, as the draft's entry names them>
     facts: <the KNOWLEDGE.md section heading, or several, one per line>
+    defaults: <absolute path to resume-kit's skills/resume/content-rules.md>
+    own-rules: <absolute path to the content folder's CLAUDE.md, or "none">
+
+`defaults:` is `${CLAUDE_SKILL_DIR}/content-rules.md`. `own-rules:` is the
+working directory's `CLAUDE.md` when it has one, else "none".
 
 Relay its report, build the draft to a temporary path, and run
-`resume-kit:resume-review` on it. The summary is not the writer's: draft
-two candidates in chat, in the author's register, for the user to pick or
+`resume-kit:resume-review` on it. The summary is not the writer's. Read
+`${CLAUDE_SKILL_DIR}/content-rules.md` and the content folder's
+`## Content rules` first, since they bind the summary too; then draft two
+candidates in chat, in the author's register, for the user to pick or
 rewrite. Promoting a draft over the live file is the user's call and never
 this skill's.
 
