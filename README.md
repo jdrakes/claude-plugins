@@ -207,7 +207,10 @@ YAML file you own; the skill ships one layout fixture and never a resume of
 its own. It reads the YAML to learn what a resume says, never the PDF,
 because a PDF is a build output and may be older than the content.
 Dispatches `resume-kit:resume-writer` to draft a role's section from facts
-in `KNOWLEDGE.md`, then `resume-kit:resume-review` on the result.
+in `KNOWLEDGE.md`, then `resume-kit:resume-review` on the result. A review
+build with no `-o` goes to the temp folder; a send-ready copy goes to a folder
+you name with `-o <folder>/`, as `<Name> Resume.pdf`, and an `-o` inside your
+content folder is refused, so no PDF is written into it.
 
 **`resume-facts`** interviews you about one role, card by card, through
 `AskUserQuestion`, and records what you say in `KNOWLEDGE.md`. It writes

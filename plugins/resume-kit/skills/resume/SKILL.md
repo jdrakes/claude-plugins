@@ -30,8 +30,19 @@ exists.
 Build:
 
 ```sh
-${CLAUDE_SKILL_DIR}/bin/build <content.yaml> [-o <out.pdf>]
+${CLAUDE_SKILL_DIR}/bin/build <content.yaml>                     # review build
+${CLAUDE_SKILL_DIR}/bin/build <content.yaml> -o "<send folder>/"  # send-ready copy
 ```
+
+No rendered PDF is written into the content folder. With no `-o`, the PDF
+goes to the system temp folder and the path is printed. A send-ready copy
+goes to the send folder the content folder's `CLAUDE.md` names; when it
+names none, ask the user once. With a trailing `/`, `-o` writes
+`<name> Resume.pdf` there, from the content's `name:`, because the file
+name is the first thing a recruiter sees. The builder expands a leading
+`~`, then refuses, with nothing written, any `-o` inside the folder the
+session runs from or inside the content file's folder; a relative `-o`
+always is.
 
 ## Agent names
 
