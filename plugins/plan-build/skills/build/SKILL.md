@@ -38,6 +38,17 @@ task stops the build. The reviewer is always opus. A `stuck` that names a
 missing permission is not retried: a permission does not cross the agent
 boundary, so report it.
 
+## Private data
+
+On a public repository, commit messages, the branch name and the pull
+request's title and body are public and permanent; rewriting history later
+does not remove them. There they carry no private data: no person's
+personal details, no private repository's name, no path under a home
+directory, no credential, no term the project's `CLAUDE.md` names as
+private, and no quote of a string a change removed. Name the class instead
+("removed a former employer's name"). Pass this paragraph, verbatim, to
+every builder and to the reviewer when the repository is public.
+
 ## 1. Set up
 
 1. Read the whole plan. A task with `- [x] done` is finished. Check each
@@ -53,6 +64,9 @@ boundary, so report it.
    is not, stop and say so: the flow needs that line, and committing to the
    user's repo before any work has happened is not yours to decide.
 5. Run the test command once. Red stops here.
+6. Run `gh repo view --json visibility -q .visibility`. `PRIVATE`,
+   `INTERNAL` or no remote: Private data does not apply to this build.
+   Anything else, a failed call included, means it does.
 
 ## 2. Each task, in order
 
@@ -60,7 +74,7 @@ boundary, so report it.
    the task number, the test command (or "none"), and the model. Description
    `Task N: <task name>`. Tell it the plan file is not committed, so its
    commit message must say what changed, why, and any decision it made.
-   Wait for it.
+   When Private data applies, include its paragraph. Wait for it.
 2. Gate, run by you, not taken from the report:
    - the full test command passes; with "none", repeat the builder's named
      verification;
@@ -72,20 +86,29 @@ boundary, so report it.
 3. Fail or `stuck`: one retry per Models. Fail again: stop and report.
 4. Pass: tick the task's `- [ ] done` yourself; a builder ticking its own
    box records a pass before the gate has run. Confirm the commit message
-   states what it decided and why; if not, the task fails the gate.
+   states what it decided and why; if not, the task fails the gate. When
+   Private data applies, read the message against it; on a hit, reword it
+   with `git commit --amend` while that commit is still HEAD, then read it
+   again.
 
 ## 3. Close
 
 1. Run the test command; red stops here.
-2. Dispatch the `plan-build:reviewer` agent with the plan's path, the base
-   SHA and the head SHA; description `Review <branch>`. For each finding
-   that is a real
-   failure, append `### Task N: fix <finding>` (Files, Intent, Accepts
-   when, `Model: opus`) and run it through step 2 once; a fix that fails is
-   reported, not retried. Other findings go in the report.
+2. When Private data applies, draft the pull request's title and body
+   first. Dispatch the `plan-build:reviewer` agent with the plan's path, the
+   base SHA and the head SHA, and when Private data applies, its paragraph,
+   the branch name and the drafted title and body; description
+   `Review <branch>`. A private data finding stops the build here: report
+   each one's commit, file and line, or field, and its class, and wait. It
+   is not a fix task, because a new commit leaves the old text in history.
+   For each other finding that is a real failure, append
+   `### Task N: fix <finding>` (Files, Intent, Accepts when, `Model: opus`)
+   and run it through step 2 once; a fix that fails is reported, not
+   retried. Other findings go in the report.
 3. Read the project's `Integration default` from its `CLAUDE.md` or
    `README.md`. Say one line naming it and act:
-   - `push, PR, verify, merge`: `gh pr create`; check
+   - `push, PR, verify, merge`: `gh pr create`, with the reviewed title
+     and body when Private data applies; check
      `gh pr view --json mergeable,mergeStateStatus`, up to five times if
      `UNKNOWN`; if `CONFLICTING`, merge the base in, resolve, push,
      re-check; `gh pr merge --merge --delete-branch`; pull the base; run
