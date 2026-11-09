@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Report the tools resume-kit's builds need that this machine is missing,
+# each with a command that installs it on a Mac.
+#
+#   typst      every PDF build
+#   pdftotext  from poppler: build-variant's check that removed text is gone
+#   python3    with PyYAML: a send-ready build into a folder, build-variant
+#              and resume-assessment's tools
+#
+# Prints one line per missing tool and exits 1, or one line saying all are
+# found and exits 0. bin/new-content-folder runs it, so a new user learns
+# what is missing before the first build. Only bash builtins and python3
+# are used, so it runs with nothing else on PATH.
+#
+# Usage:
+#   bin/check-tools
+set -uo pipefail
+
+found() { command -v "$1" >/dev/null 2>&1; }
+
+lines=""
+add() { lines="${lines}- $1"$'\n'; }
+
+if ! found typst || ! found pdftotext; then
+  if ! found brew; then
+    add 'Homebrew, which installs the next ones: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)", then run the "Next steps" lines it prints and open a new Terminal window'
+  fi
+fi
+found typst || add "typst: brew install typst"
+found pdftotext || add "pdftotext: brew install poppler"
+
+if found python3 && python3 -c 'import sys' >/dev/null 2>&1; then
+  if ! python3 -c 'import yaml' >/dev/null 2>&1; then
+    # PEP 668: a python that marks itself externally managed (Homebrew's)
+    # refuses pip install --user unless told it may.
+    if python3 -c 'import os, sys, sysconfig; sys.exit(0 if os.path.exists(os.path.join(sysconfig.get_path("stdlib"), "EXTERNALLY-MANAGED")) else 1)' >/dev/null 2>&1; then
+      add "PyYAML: python3 -m pip install --user --break-system-packages pyyaml"
+    else
+      add "PyYAML: python3 -m pip install --user pyyaml"
+    fi
+  fi
+else
+  add "python3: xcode-select --install"
+  add "PyYAML, after python3: python3 -m pip install --user pyyaml"
+fi
+
+if [[ -z "$lines" ]]; then
+  echo "All tools found: typst, pdftotext, python3 with PyYAML."
+  exit 0
+fi
+echo "Missing tools. PDFs will not build until these are installed; run each command in Terminal:"
+printf '%s' "$lines"
+exit 1

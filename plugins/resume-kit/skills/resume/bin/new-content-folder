@@ -3,6 +3,7 @@
 # with invented example content, an empty KNOWLEDGE.md, an empty drafts/,
 # and a CLAUDE.md that says where the user's own content rules go and asks
 # for their send folder.
+# It ends by running bin/check-tools, so a missing tool is named before the first build.
 #
 # Usage:
 #   bin/new-content-folder <folder>
@@ -38,3 +39,4 @@ cp "$starter/CLAUDE.template.md" "$folder/CLAUDE.md"
 
 echo "created $folder: resume-v1.yaml, KNOWLEDGE.md, drafts/, CLAUDE.md"
 echo "next: start Claude Code in $folder, replace the example content, and name your send folder in CLAUDE.md"
+"$skill_dir/bin/check-tools" || true

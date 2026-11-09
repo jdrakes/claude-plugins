@@ -276,7 +276,7 @@ Run every resume-kit skill from your resume directory; each one resolves
 its working files against the directory the session is started in, not a
 fixed path.
 
-`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder.
+`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder. It ends by naming any missing tool.
 
 | Requirement | Why |
 |---|---|
@@ -293,7 +293,9 @@ line from a market file for its gap list. Neither fetches a posting itself.
 
 Toolchain: **typst** (the snapshot baseline in `resume` was generated on
 0.15.1 and verified on 0.14.2, 0.15.0 and 0.15.1), `pdftotext` from
-poppler (required for `build-variant`, which fails without it), and `python3` with `pyyaml`.
+poppler (required for `build-variant`, which fails without it), and `python3` with `pyyaml`. `skills/resume/bin/check-tools` reports
+any of these that is missing, with a command that installs it on a
+Mac, and `new-content-folder` runs it when it creates a folder.
 
 ### The renderer
 

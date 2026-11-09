@@ -41,6 +41,12 @@ where the resume lives.
   posting text, and names it. Read it, never fetch it. With no posting
   file, run pass 1 only.
 
+When a build stops because a tool is missing (`command not found`,
+`No module named 'yaml'`, or build-variant's pdftotext error), run
+`${CLAUDE_PLUGIN_ROOT}/skills/resume/bin/check-tools`, show its lines word for word,
+and stop. Never route around a missing tool. For example, do not give
+`-o` a file path so that the build skips PyYAML.
+
 ## 2. Dispatch
 
 One `Agent` call, `subagent_type: resume-kit:screener`. The agent ships

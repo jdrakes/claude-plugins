@@ -46,6 +46,12 @@ name is the first thing a recruiter sees. The builder expands a leading
 session runs from or inside the content file's folder; a relative `-o`
 always is.
 
+When a build stops because a tool is missing (`command not found`,
+`No module named 'yaml'`, or build-variant's pdftotext error), run
+`${CLAUDE_SKILL_DIR}/bin/check-tools`, show its lines word for word,
+and stop. Never route around a missing tool. For example, do not give
+`-o` a file path so that the build skips PyYAML.
+
 ## Variants
 
 A variant is a copy of a content file with some entries removed, such as a
@@ -84,6 +90,12 @@ empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` that says where
 the user's own content rules go and asks for their send folder. Then tell
 the user to start Claude Code from that folder, since every skill resolves
 its files against the folder it runs from.
+
+The script ends by running `${CLAUDE_SKILL_DIR}/bin/check-tools`.
+When its output starts `Missing tools`, show the person every line
+of it word for word, before anything else, and say that PDFs will not
+build until they run those commands. When it says `All tools found`,
+say nothing about tools.
 
 ## Agent names
 
