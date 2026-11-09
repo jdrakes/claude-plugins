@@ -5,8 +5,8 @@
 #
 # No rendered PDF is written into the content folder, which is usually a
 # repository. A review build goes to the temp folder; a send-ready copy goes
-# where -o says, and an -o inside the current folder or the content file's
-# folder is refused.
+# where -o says, and an -o inside the current folder, the content file's
+# folder or, for a draft, the folder that holds drafts/ is refused.
 #
 # Usage:
 #   bin/build <content.yaml>              review build, <temp>/<stem>.pdf
@@ -63,15 +63,34 @@ content="$(resolve_path "$content_arg")"
 
 # Where an -o lands: a leading ~ expanded (a quoted "~/..." arrives here
 # unexpanded), resolved against the folder this was run from with symlinks
-# followed, named "<name> Resume.pdf" when it is a folder, then refused when
-# inside the current folder or the content file's folder. A relative -o is
-# therefore always refused. Python, because resolving a path that does not
-# exist yet is not portable between macOS and Linux shells. Read into a
-# variable rather than written as a heredoc inside $( ), which bash 3.2
-# misparses when the code holds an apostrophe.
+# followed, named "<name> Resume.pdf" when it is a folder and resolved again
+# (a name can hold "../"), then refused when inside the current folder, the
+# content file's folder, or, for a content file in drafts/, the folder that
+# holds drafts/. A relative -o is therefore always refused. Python, because
+# resolving a path that does not exist yet is not portable between macOS and
+# Linux shells. Read into a variable rather than written as a heredoc inside
+# $( ), which bash 3.2 misparses when the code holds an apostrophe.
 read -r -d '' place_output <<'PYEOF' || true
 import os
 import sys
+
+def inside(path, folder):
+    # By file identity as well as by spelling: on a case-insensitive disk
+    # "Content" and "content" are one folder but two strings. The existing
+    # ancestors of path are compared, since path itself may not exist yet.
+    if os.path.commonpath([path, folder]) == folder:
+        return True
+    if not os.path.exists(folder):
+        return False
+    ancestor = path
+    while not os.path.exists(ancestor):
+        ancestor = os.path.dirname(ancestor)
+    while True:
+        if os.path.samefile(ancestor, folder):
+            return True
+        if os.path.dirname(ancestor) == ancestor:
+            return False
+        ancestor = os.path.dirname(ancestor)
 
 cwd, content, given = sys.argv[1:]
 path = os.path.realpath(os.path.join(cwd, os.path.expanduser(given)))
@@ -84,10 +103,14 @@ if given.endswith("/") or os.path.isdir(path):
     name = data.get("name") if isinstance(data, dict) else None
     if not name:
         sys.exit(f"no name in {content} to name the PDF by; give -o a file path")
-    path = os.path.join(path, f"{name} Resume.pdf")
-for folder, label in ((os.path.realpath(cwd), "the current folder"),
-                      (os.path.realpath(os.path.dirname(content)), "the content file's folder")):
-    if os.path.commonpath([path, folder]) == folder:
+    path = os.path.realpath(os.path.join(path, f"{name} Resume.pdf"))
+content_folder = os.path.realpath(os.path.dirname(content))
+guarded = [(os.path.realpath(cwd), "the current folder"),
+           (content_folder, "the content file's folder")]
+if os.path.basename(content_folder) == "drafts":
+    guarded.append((os.path.dirname(content_folder), "the folder that holds drafts/"))
+for folder, label in guarded:
+    if inside(path, folder):
         sys.exit(f"refusing to write {path}: it is inside {label}, {folder}")
 print(path)
 PYEOF

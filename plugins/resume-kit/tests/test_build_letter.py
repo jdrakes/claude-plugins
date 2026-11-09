@@ -195,6 +195,37 @@ class OutputFolderTests(unittest.TestCase):
         self.assertEqual(self.written(), ["letters/app.md"])
 
 
+    def test_a_differently_cased_source_folder_is_refused(self):
+        # Breaks if the folders are compared as strings: on a case-insensitive
+        # disk <work>/LETTERS is the source's folder under another spelling.
+        upper = self.work / "LETTERS"
+        if not upper.exists():
+            self.skipTest("the temp filesystem is case-sensitive, so LETTERS is another folder")
+        code, err = self.run_main(str(upper / "letter.pdf"))
+        self.assertNotEqual(code, 0)
+        self.assertIn("application file's folder", err)
+        self.assertEqual(self.written(), ["letters/app.md"])
+
+    def test_a_draft_cannot_write_into_the_folder_above_drafts(self):
+        # Breaks if only the draft's own folder is guarded: drafts/ sits inside
+        # the content folder, which must stay free of PDFs too.
+        (self.work / "letters" / "drafts").mkdir()
+        self.source = self.source.rename(self.work / "letters" / "drafts" / "app.md")
+        code, err = self.run_main(str(self.work / "letters" / "letter.pdf"))
+        self.assertNotEqual(code, 0)
+        self.assertIn("the folder that holds drafts/", err)
+        self.assertEqual(self.written(), ["letters/drafts/app.md"])
+
+    def test_a_name_that_climbs_into_the_source_folder_is_refused(self):
+        # Breaks if the path is not resolved again after the name is joined:
+        # "../letters/Alex" walks out of the send folder into the source's.
+        self.source.write_text(
+            "# App\n\n## Letter\n\nHi,\n\n../letters/Alex\nalex.rivera@example.com\n")
+        code, err = self.run_main(str(self.work / "send") + "/")
+        self.assertNotEqual(code, 0)
+        self.assertIn("application file's folder", err)
+        self.assertEqual(self.written(), ["letters/app.md"])
+
 NEEDS = ("typst", "pdftotext", "pdffonts")
 
 

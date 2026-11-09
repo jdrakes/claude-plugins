@@ -102,6 +102,38 @@ class OutputPathTests(unittest.TestCase):
         self.assertIn("no name", result.stderr)
         self.assertFalse((self.work / "send").exists())
 
+    def test_a_differently_cased_content_folder_is_refused(self):
+        # Breaks if the folders are compared as strings: on a case-insensitive
+        # disk <work>/CONTENT is the content folder under another spelling.
+        upper = self.work / "CONTENT"
+        if not upper.exists():
+            self.skipTest("the temp filesystem is case-sensitive, so CONTENT is another folder")
+        result = self.build("-o", str(upper / "resume.pdf"), cwd=self.elsewhere)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("the content file's folder", result.stderr)
+        self.assertEqual(self.content_folder_files(), ["resume-v1.yaml"])
+
+    def test_a_draft_cannot_write_into_the_folder_above_drafts(self):
+        # Breaks if only the draft's own folder is guarded: drafts/ sits inside
+        # the content folder, which must stay free of PDFs too.
+        drafts = self.content_folder / "drafts"
+        drafts.mkdir()
+        self.content = drafts / "resume-v1-draft.yaml"
+        self.content.write_text("name: Alex Rivera\n", encoding="utf-8")
+        result = self.build("-o", str(self.content_folder / "resume.pdf"), cwd=self.elsewhere)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("the folder that holds drafts/", result.stderr)
+        self.assertEqual(self.content_folder_files(), ["drafts", "resume-v1.yaml"])
+
+    def test_a_name_that_climbs_into_the_content_folder_is_refused(self):
+        # Breaks if the path is not resolved again after the name is joined:
+        # "../content/Alex" walks out of the send folder into the content one.
+        self.content.write_text("name: ../content/Alex\n", encoding="utf-8")
+        result = self.build("-o", f"{self.work}/send/", cwd=self.elsewhere)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("the content file's folder", result.stderr)
+        self.assertEqual(self.content_folder_files(), ["resume-v1.yaml"])
+
     def test_output_over_a_yaml_file_is_refused(self):
         result = self.build("-o", str(self.elsewhere / "resume.yaml"))
         self.assertNotEqual(result.returncode, 0)
