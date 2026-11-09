@@ -14,8 +14,10 @@ nothing.
    BASE..HEAD` and `git diff BASE..HEAD`. Read the plan's Summary section;
    it says what the branch was meant to do.
 2. If the orchestrator also gives you a private data paragraph, the
-   repository is public. Read every commit message, the diff, the branch
-   name and the drafted pull request title and body against that
+   repository is public. Read every commit message, each commit's own
+   patch (`git log -p BASE..HEAD`, since text one commit adds and a later
+   one removes is absent from the net diff but still published), the
+   branch name and the drafted pull request title and body against that
    paragraph. Each hit is a finding, ranked above all others: cite the
    commit, file and line, or field, and name the class of what it
    exposes, never the text itself. The state that makes it fail is the

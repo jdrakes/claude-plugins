@@ -125,10 +125,11 @@ first, each with the input or state that makes it fail.
 On a public repository, `build` also keeps private data out of the text
 that becomes public: the builder writes commit messages that name the
 class of anything private, the gate rereads each message, and the
-reviewer reads every commit message, the branch name and the drafted pull
-request text. A hit there stops the build before anything is pushed. On a
-private repository none of this runs. Commits made outside a build are not
-checked.
+reviewer reads every commit message, each commit's patch, the branch name
+and the drafted pull request text. A hit there stops the build before
+anything is pushed. On a private repository none of this runs. Work `plan`
+hands back as too small for a plan carries the same rule for its commit
+message, branch and pull request, but nothing checks it.
 
 ### What your project needs to provide
 

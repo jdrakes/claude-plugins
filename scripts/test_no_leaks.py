@@ -22,8 +22,8 @@ from pathlib import Path
 # breaks.
 #
 # Two false-positive risks are worth knowing about, both widened slightly by
-# the case fold. "Spruce" is an ordinary English word as well as a former
-# employer, and lowercase "spruce" now matches too. "job_search" will not
+# the case fold. One needle is also an ordinary English word, and its
+# lowercase form now matches too. "job_search" will not
 # fire on the phrase "job search", but "job-search-archive" would fire on any
 # future prose naming a job-search archive that means something else.
 # "James_Drakes" is deliberately absent: it contains "James", which already
