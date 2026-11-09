@@ -1,11 +1,11 @@
 # claude-plugins
 
-A marketplace of five plugins: `plan-build`, an agent workflow for
+A marketplace of six plugins: `plan-build`, an agent workflow for
 planning and building software changes, `resume-kit`, an opinionated
 resume toolkit, `purchase-research`, a method for researching a purchase
 and logging each decision, `design-review`, design judgment for an
-existing UI, and `schedule-rules`, calendar judgment from a rules file
-you write.
+existing UI, `schedule-rules`, calendar judgment from a rules file you
+write, and `cold-reader`, a cold read of your own writing.
 
 ## Install
 
@@ -16,6 +16,7 @@ you write.
 /plugin install purchase-research@jdrakes
 /plugin install design-review@jdrakes
 /plugin install schedule-rules@jdrakes
+/plugin install cold-reader@jdrakes
 ```
 
 The old `jdrakes/claude-plan-build` URL still resolves, through GitHub's
@@ -504,3 +505,80 @@ and a minimum buffer.
 
 To fix the rules file and the goals file once, write a small skill of your
 own whose body names both and invokes `schedule-rules:schedule-rules`.
+
+## cold-reader
+
+A cold read of your own writing: a skill that gathers exactly the files a
+read needs, and a read-only agent that reads one chapter, one piece or a
+whole book against them and reports ranked findings in chat.
+
+### The opinions
+
+These are the argument. If you disagree with them, the plugin is not for
+you.
+
+1. **Judge the page, not the intent.** The reader has not seen the piece
+   drafted and does not know what was meant; a reader who watched the
+   drafting forgives the page. (Agent, opening; skill, opening)
+2. **Never rewrite, never suggest a sentence, a word or a phrasing.** A
+   suggested sentence becomes the author's sentence. The reader reports
+   what is wrong and where. (Agent, opening)
+3. **The reader reads only the files the dispatch names.** The record's
+   reasoning is withheld: you name the paths it must never see, and it
+   never sees them. (Skill, Inputs and each mode's "What the reader
+   gets"; agent, opening)
+4. **Ceilings are hard.** Chapter: at most 9 structural findings, 3 line
+   findings and then a count, 3 possible gaps. Book: at most 12 findings,
+   3 on voice, 5 possible gaps. Piece: at most 5 structural, 3 line and
+   then a count. (Agent, each mode)
+5. **Verdict first**: keep, rework or cut, and the one thing that
+   decides it; for a book, whether it is a book. (Agent, each mode's
+   Verdict)
+6. **Read once as a reader, then once as an editor.** Book mode reads
+   every chapter once, in order, in one agent; the book is never split
+   across agents. (Agent, opening; skill, Book mode)
+7. **Possible gaps in the record are stated, never ruled on**: the fact
+   the page invented and where it first appears. (Agent, mode: chapter
+   and mode: book)
+8. **Earlier chapters outrank the voice file**, and piece mode never
+   reads the voice file: a piece is judged against itself, not against a
+   profile of its author. (Agent, opening and mode: piece)
+9. **Piece mode asks the whole-piece question first**: a poem, whether it
+   earns the themes it claims; a story, whether what the opening sets up
+   is paid; an essay, whether the page proves its claim. (Agent, mode:
+   piece)
+10. **The report is relayed unedited.** A report that breaks its shape or
+    proposes a sentence is flagged above it and left as is: the breach is
+    itself a finding. (Skill, Relay)
+
+### What is in it
+
+**`cold-reader`**, the skill (`cold-reader:cold-reader`), decides the
+mode (chapter, piece or book), resolves the piece, gathers exactly the
+inputs that mode allows, dispatches one agent, and relays its report.
+
+**`cold-reader`**, the agent (`cold-reader:cold-reader`), is read-only
+(Read, Grep, Glob; no shell) and asks for Opus. Its standards and its
+report shapes, one per mode, live in its file.
+
+`skills/cold-reader/examples/` is an invented book to try it on: three
+chapters in `examples/chapters/` and `examples/outline.md`, with no lore.
+
+### What your project needs to provide
+
+| Input | Why |
+|---|---|
+| A chapters directory of numbered files, such as `07-the-crossing.md` | Chapter and book mode. The highest number is the latest chapter; the two before a chapter are its voice and continuity reference |
+| Optional: an outline file | The beat a chapter should serve, the threads a book should pay, and gaps in the record |
+| Optional: lore, a file or a directory | Facts a chapter can contradict. A directory with a `README.md` index lets chapter mode send only the pages a chapter touches |
+| Optional: a running order file | Act boundaries for book mode. The reader never sees it |
+| Optional: a voice file, and the sections to read | Chapter and book mode hold it lightly; earlier chapters outrank it. Piece mode never reads it |
+| Optional: the paths the reader must never see | Open questions, the reasoning behind decisions, archives, other books, a draft's own notes |
+| A model that holds a whole book in one context | Book mode is never split across agents |
+| A shell with `wc -w` | Book mode's word count per act |
+
+Each is named by you, by a skill of your own that invokes this one, or by
+your project's `CLAUDE.md`, in that order. To fix them once, write a small
+skill whose body names them and invokes `cold-reader:cold-reader`. A
+direct dispatch of the agent reads only what its dispatch names, so a
+wrapper skill covers the skill, not the agent.
