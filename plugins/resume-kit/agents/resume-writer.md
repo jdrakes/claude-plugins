@@ -63,7 +63,8 @@ Each role is as long as its facts, no longer and no shorter: never
 padded past them, never cut to match a thinner role above it. Where the
 current role has the facts, it gets the most specific bullets.
 
-Edit only the named section of the named draft. The draft is YAML: a
+Edit only the named section of the named draft. Keep every comment line (a line
+starting with `#`) and every comment at the end of a line. The draft is YAML: a
 bullet containing a colon followed by a space must be quoted or
 rephrased, or the file will not parse. Never commit; leave the
 tree changed. Report in your final message, under 12 lines: the bullets

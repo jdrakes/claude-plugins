@@ -156,3 +156,83 @@ The Northgate bullets as written:
 
 The report itself named a mixed tense in bullet 1 ("Set up" with
 "places"). That is LUM-69's check, not this case's.
+
+## LUM-69: basics through a draft
+
+- **Setup**, in place of "How to run" step 2, a folder made by the
+  starter, not a copy of the fixture:
+
+  ```sh
+  F="$(mktemp -d)/dana"; "<P>/skills/resume/bin/new-content-folder" "$F"
+  ```
+
+- **Prompt:** "Put my basics on my resume: my name is Dana Whitfield, I am
+  a science teacher, I live in Columbus, Ohio, my email is
+  dana.whitfield@example.com and my phone is (555) 0199."
+- **Mode:** `acceptEdits`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill" "Edit" "Bash(cp:*)" "Bash(mkdir:*)"`.
+- **Passes when**, all of these:
+  1. `cmp "$F/resume-v1.yaml" "<P>/skills/resume/starter/resume-v1.yaml"`
+     prints nothing.
+  2. `drafts/resume-v1-draft.yaml` holds "Dana Whitfield" and
+     "dana.whitfield@example.com".
+  3. `diff <(grep -E '^[[:space:]]*#' "<P>/skills/resume/starter/resume-v1.yaml") <(grep -E '^[[:space:]]*#' "$F/drafts/resume-v1-draft.yaml")`
+     prints nothing.
+  4. The reply says in one line that the change is in the draft and the
+     live resume changes when they promote it.
+
+### Last run
+
+2026-11-09, opus, with the new "Changing what the resume says" section.
+No permission denial blocked a step; no rerun. The run also asked for a
+review build, which the tool list does not allow, and said so.
+
+| Check | Result |
+| --- | --- |
+| Live file unchanged | **pass.** `cmp` printed nothing |
+| Basics in the draft | **pass.** The draft holds "Dana Whitfield" and "dana.whitfield@example.com" |
+| Comments kept | **pass.** The `diff` printed nothing. The comment at the end of the `title:` line stayed too |
+| One-line draft note | **pass.** "Your basics are in the draft, `drafts/resume-v1-draft.yaml`." |
+
+The reply's draft lines, quoted: "Your basics are in the draft,
+`drafts/resume-v1-draft.yaml`. Your live resume, `resume-v1.yaml`, has
+not changed. It changes only when you tell me to promote the draft."
+
+## LUM-69: the send build flags long bullets and mixed tense
+
+- **Setup**, after "How to run" step 2:
+
+  ```sh
+  cp "<P>/evals/trial/send-resume.yaml" "$F/resume-v1.yaml"; O="$(mktemp -d)"
+  ```
+
+  `send-resume.yaml` is a finished page for Dana with two faults on
+  purpose. Its first Northgate bullet renders on 4 lines, and that role
+  pairs a present-tense "Run" with a past-tense "Mentored".
+- **Prompt:** "Make me a PDF I can send. My send folder is `$O/`", with
+  `$O` written out.
+- **Mode:** `default`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill" "Edit" "Bash(<P>/skills/resume/bin/build:*)" "Bash(pdftotext:*)"`.
+- **Passes when**, all of these:
+  1. The reply quotes "Set up the shared order spreadsheet" as over 3
+     lines.
+  2. It names "Mentored" beside a present-tense verb from the Northgate
+     role.
+  3. It asks in one line whether to fix first.
+  4. `find "$O" -name '*.pdf'` prints nothing.
+
+### Last run
+
+2026-11-09, opus, with the new "Before a send-ready build" section. No
+permission denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| Long bullet | **pass.** Names the Science Teacher bullet "Set up the shared order spreadsheet..." at 4 lines |
+| Mixed tense | **pass.** Says "Run" (present) is next to "Mentored" (past) |
+| Asks first | **pass.** "Should I fix these in a draft first, or make the PDF to send as it is now?" |
+| No send copy | **pass.** `find "$O" -name '*.pdf'` printed nothing |
+
+The reply's flag lines, quoted: "One bullet runs over 3 lines", "Present
+and past tense mixed in one role". It also asked whether to save the send
+folder to `CLAUDE.md`, and did not change the file before the answer.
