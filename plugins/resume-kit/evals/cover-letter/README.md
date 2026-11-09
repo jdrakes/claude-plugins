@@ -97,7 +97,59 @@ From the plugin directory, with `P` set to its absolute path:
 
 ## Last run
 
-Not yet rerun after the second rewrite below.
+2026-11-09, opus, bar 403 (base `2026-01-12-base-backend-engineer-cover-letter.md`),
+after the second rewrite below. Both cases pass.
+
+Each case was run with the prompt on stdin, `--permission-mode default`
+and `--allowedTools "Agent" "Read" "Glob" "Grep"`. A first attempt that
+allowed only `Agent` returned no review: the reader's reads waited on a
+permission prompt that `claude -p` cannot answer, and it said so rather
+than guess.
+
+| Case | Words | Over the bar | Result |
+| --- | --- | --- | --- |
+| `letter-good.md` | 429 | 26 | **pass** |
+| `letter-broken.md` | 554 | 151 | **pass** |
+
+`letter-good.md`, against its row:
+
+| Expectation | Reported |
+| --- | --- |
+| A Pass 1 verdict | Interview |
+| No untraceable claim | "Untraceable: none" |
+| No content-rule finding | None. It names "four hours to under ten minutes" and "halve database load" as before and after figures for the author's own work, which the rule allows |
+| No author-confirmation item for the confirmed hook | None. It cites ruling 2 as confirming the hook as written |
+| Settled rulings left alone | Yes. Rulings 1 to 3 read and none re-asked |
+| Stance item for "the parts I like working on" | Reported, as expected |
+
+Its four Pass 1 findings are about structure: paragraph 4 buries the link
+to Lakeside and repeats the checklist; the mechanism covers callers that
+read but the claim is about writes; "I also took on the search service"
+reads like a resume line; the opening goes generic after sentence 2. In
+Pass 2 it marks the p99 claim traced, with a wording mismatch: the letter
+says "changing how one query filter uses its index", `KNOWLEDGE.md` says
+"removing it" of a filter that ran a full-text scan, and `skills/resume/examples/sample-resume.yaml` says
+"removing an accidental full-text scan". The resume half of that rests on
+the layout fixture's wording, which this plan leaves alone; it is a known
+fixture limitation, not a reader fault.
+
+`letter-broken.md`, against its row:
+
+| Expectation | Reported |
+| --- | --- |
+| Length as a finding | Finding 3: 151 over, past the 42-word tolerance |
+| Invented claim untraceable | "led the incident response" and "wrote the postmortem", each contradicted by `## Not on file` |
+| Unconfirmed motivation untraceable | "Lakeside Freight's move to event sourcing", not in the posting |
+| The same as author-confirmation required | "is what made me apply", with ruling 2 recording a different reason |
+| Settled rulings left alone | Yes. The confirmed hook is not raised; Pass 2 notes that ruling 1 settles "ended the overnight rota" from finding 5 |
+| Content-rule findings, allowed | Finding 4, least-charitable: "search service nobody owned", "had doubled database load since launch", "the overnight rota that existed only to restart it". Finding 5, on-call: "two other engineers have since taken on-call for it", "ended the overnight rota" |
+
+It also reports the application file contradicting itself (no Evidence
+row for paragraph 5, incident response listed as not used,
+`## Confirm before sending` at `None.`) and the stance item.
+
+Pass 1 findings that name a content rule: none in the good case; findings
+4 and 5 in the broken case, as above.
 
 A rerun on 2026-11-09 failed the good case on one content-rule finding:
 the least-charitable rule, quoting three phrases from the base letter,
