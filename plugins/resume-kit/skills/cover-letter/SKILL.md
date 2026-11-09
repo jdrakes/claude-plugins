@@ -6,11 +6,12 @@ description: "Takes a posting and produces a sendable cover letter plus its appl
 # cover-letter
 
 One letter, one application file, one cold read. This skill writes the
-file itself; a new file under `applications/` is a visible and reversible
-write, so there is no pause and no approval gate before it lands. What it
-never does without the user is decide the content of the letter itself: a
-hook, a motivation, a first base letter, or an AI-usage attestation ruling
-is always theirs.
+file itself. A first base letter is the one exception: it is never written
+until the person approves it ("No base found", step 3). Every other new
+file under `applications/` is a visible and reversible write, so it lands
+without a pause. What it never does without the user is decide the
+content of the letter itself: a hook, a motivation, a first base letter,
+or an AI-usage attestation ruling is always theirs.
 
 The cold read runs in the `resume-kit:letter-reader` agent
 (`${CLAUDE_PLUGIN_ROOT}/agents/letter-reader.md`), for the reason
