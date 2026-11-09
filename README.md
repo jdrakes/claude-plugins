@@ -1,9 +1,10 @@
 # claude-plugins
 
-A marketplace of three plugins: `plan-build`, an agent workflow for
+A marketplace of four plugins: `plan-build`, an agent workflow for
 planning and building software changes, `resume-kit`, an opinionated
-resume toolkit, and `purchase-research`, a method for researching a
-purchase and logging each decision.
+resume toolkit, `purchase-research`, a method for researching a purchase
+and logging each decision, and `design-review`, design judgment for an
+existing UI.
 
 ## Install
 
@@ -12,6 +13,7 @@ purchase and logging each decision.
 /plugin install plan-build@jdrakes
 /plugin install resume-kit@jdrakes
 /plugin install purchase-research@jdrakes
+/plugin install design-review@jdrakes
 ```
 
 The old `jdrakes/claude-plan-build` URL still resolves, through GitHub's
@@ -355,3 +357,78 @@ is an invented, filled-in entry.
 
 To fix the log directory once, write a small skill of your own whose body
 names the directory and invokes `purchase-research:purchase-research`.
+
+## design-review
+
+Design judgment for an existing UI: a skill for the session you are in and
+an agent for a UI task worth handing off. Both read source, not a rendered
+page.
+
+### The opinions
+
+These are the argument. If you disagree with them, the plugin is not for
+you.
+
+The method:
+
+1. **The project's own tokens are precedent.** If a documented choice looks
+   wrong, say so and ask rather than replace it. (`design-review` skill,
+   step 1)
+2. **Universal practice applies everywhere**: WCAG AA contrast measured on
+   the real colour pair, hierarchy, spacing, restraint. (skill, step 3)
+3. **Brand belongs to one project.** Palette, density and voice are never
+   carried into another project. (skill, step 3)
+4. **Taste is weighed, not enforced.** A screen can clear the bar while
+   looking nothing like the project the taste came from. (skill, Input and
+   step 2)
+
+The agent:
+
+5. **When it is open whether the ask is a review or a change, it is a
+   review**, and the agent says so: an unwanted assessment costs a message,
+   an unwanted edit costs a revert. (`design-review` agent, step 1)
+6. **The agent never commits, never spawns a subagent, and reports under 15
+   lines.** Commits happen when the user asks. (agent, steps 2 to 4)
+
+The default taste (`skills/design-review/references/default-taste.md`),
+which a taste file of your own replaces whole:
+
+7. **Personality is carried by typography and content, not decoration**,
+   somewhere between a themed look and a generic minimal one.
+8. **One accent, used sparingly, never a dominant block**, with the places
+   it may appear listed.
+9. **Template patterns are rejected for a stated reason**, not by default.
+10. **Large, offset display type and an asymmetric hero** over small
+    centred text.
+11. **Monospace for dates, role lines and meta labels**; system sans for
+    body and headings.
+
+### What is in it
+
+**`design-review` skill** (`design-review:design-review`) finds the
+project's stack and its tokens or theme file, reads the taste file, and
+applies universal practice and per-project brand. It works on the code and
+produces no document.
+
+**`design-review` agent** (`design-review:design-review`) takes one UI task,
+decides whether it is a review or a change, reads the skill through
+`${CLAUDE_PLUGIN_ROOT}`, and reports under 15 lines. It edits code for a
+change and never commits.
+
+**`skills/design-review/references/default-taste.md`** is the default
+taste: five observations from the reasoning behind one personal site.
+
+### What your project needs to provide
+
+| Requirement | Why |
+|---|---|
+| A visual surface in source: markup, styles or components | Both read source, not a rendered page; with none, the agent reports `stuck` and the skill has nothing to add |
+| Optional: a tokens or theme file with its choices documented | Those choices are precedent; the skill asks before replacing one |
+| Optional: a taste file, named by you, by a skill of your own that invokes this one, or by your project's `CLAUDE.md` | It replaces the default taste whole; either way it is weighed, never enforced |
+
+To use your own taste for both the skill and the agent, name your taste
+file in your project's `CLAUDE.md`. A small skill of your own whose body
+names the taste file and invokes `design-review:design-review` covers only
+the skill: a direct dispatch of the `design-review:design-review` agent
+never sees it and falls back to the default taste. When you dispatch the
+agent, name the taste file in the task, or wrap the agent too.
