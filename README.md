@@ -181,12 +181,13 @@ the ceremony is 94 percent of the tokens. The eval suite cost 4.20 USD and
 
 ## resume-kit
 
-An opinionated resume toolkit: a Typst renderer with its geometry
-documented, an interview skill that records facts before any bullet is
-written, a cold-reader screener agent, and a snapshot test that catches
-layout regressions. It ships no eval suite: these skills fire on explicit
-resume requests, not on the trigger ambiguity plan-build's eval exists to
-measure.
+An opinionated resume and cover letter toolkit: a Typst renderer with its
+geometry documented, an interview skill that records facts before any bullet
+is written, cold-reader agents for the resume and the letter, and a snapshot
+test that catches layout regressions. It ships no trigger eval: these skills
+fire on explicit requests, not on the trigger ambiguity plan-build's eval
+exists to measure. `evals/cover-letter/` holds two cases for the letter
+reader, run by hand.
 
 ### What is in it
 
@@ -213,6 +214,18 @@ the page does not name. Market text is a file you supply, one posting per
 line. With no such file it reports structure and pages only, rather than
 inventing a gap list.
 
+**`cover-letter`** (`resume-kit:cover-letter`) takes a posting. It audits the
+application form first, picks a base letter from
+`applications/*-base-*-cover-letter.md`, drafts from `KNOWLEDGE.md` and the
+live resume only, measures the draft against the base's own length,
+dispatches `resume-kit:letter-reader`, and renders the `## Letter` section
+alone to PDF with the resume's fonts. A review build goes to the temp
+folder; the send-ready copy goes to an output folder you name with `-o`, as
+`<Name> Cover Letter.pdf`. It never writes a PDF into your content folder:
+it expands a leading `~` in `-o`, then refuses any `-o` that resolves
+inside the folder it runs from or inside the letter's folder, so a
+relative `-o` is always refused.
+
 **`resume-writer`** is the subagent `resume` dispatches to turn
 `KNOWLEDGE.md` facts into bullets for one role, writing only to a draft. A
 bullet that reads well but rests on no recorded fact is the thing it exists
@@ -222,6 +235,10 @@ to prevent.
 reads a built resume the way a recruiter and a hiring manager do and
 reports, ranked, what would stop it getting a screen call. It never
 rewrites and never proposes a bullet.
+
+**`letter-reader`** is the read only subagent `cover-letter` dispatches. It
+reads the letter cold as a hiring manager would, then traces every claim,
+and never proposes a sentence.
 
 ### What your project needs to provide
 
@@ -234,6 +251,8 @@ fixed path.
 | A content YAML | The source of what the resume says; the skill never reads the PDF for this |
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
+| `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
+| An optional `CLAUDE.md` in the content folder | `cover-letter` reads the live resume's file name, the content rules and any writing-style skill to invoke from it |
 
 A posting is optional and always supplied as a file you name: `resume-review`
 reads it for its second pass, and `resume-assessment` reads one posting per
