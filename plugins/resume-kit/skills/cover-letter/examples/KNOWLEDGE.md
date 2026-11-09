@@ -42,7 +42,7 @@ gave it and when.
 - **Tracing.** Alex added distributed tracing across six services. The
   traces showed one client retrying every failed write three times while the
   server also retried, which had doubled database load since launch. Alex
-  removed the client retry. (Alex, 2026-01-10)
+  removed the client retry, which halved database load. (Alex, 2026-01-10)
 - **Search service.** Nobody owned the search service when Alex took it on.
   A filter meant to use an index ran a full-text scan on every query;
   removing it cut p99 latency by half. Alex wrote a runbook and a design note,

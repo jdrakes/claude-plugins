@@ -39,6 +39,14 @@ The two planted defects in `letter-broken.md`:
 | `letter-good.md` | A Pass 1 verdict. **No** untraceable claim. **No** content-rule finding. No author-confirmation item for the hook the rulings already close |
 | `letter-broken.md` | The length as a finding. **Both** planted claims as untraceable; the second also as author-confirmation required. Content-rule findings for the on-call, rota and deficiency wording are allowed and expected |
 
+The content-rule expectation for `letter-good.md` rests on the clarified
+least-charitable rule in `skills/resume/content-rules.md`: a before and
+after number for the owner's own work passes ("from four hours to under
+ten minutes", "halve database load", "halved its p99 latency"), and a
+sentence describing the employer's system as broken or wasteful does not.
+A reader that flags one of those numbers as deficiency framing fails the
+good case.
+
 Both cases must leave settled `## Rulings` items alone. A reader that
 re-asks a confirmed question fails even when its other findings are right.
 
@@ -89,7 +97,23 @@ From the plugin directory, with `P` set to its absolute path:
 
 ## Last run
 
-Not yet rerun after the content-rule rewrite below.
+Not yet rerun after the second rewrite below.
+
+A rerun on 2026-11-09 failed the good case on one content-rule finding:
+the least-charitable rule, quoting three phrases from the base letter,
+"writes retried by both a client and the server", "a full-text scan that
+a filter ran on every query" and "the nightly run, once four hours long".
+The owner decided the reading the rule now states: a before and after
+number for the owner's own work passes, and a sentence describing the
+employer's system as broken or wasteful does not. The base and
+`letter-good.md` now say what was built and its effect, with the number:
+tracing used to halve database load by removing one client's retry,
+p99 halved by changing how one query filter uses its index, and the
+nightly run going from four hours to under ten minutes. A clause the
+record holds, that a caller that only read orders kept working unchanged,
+keeps the base inside 400 to 450 words. The base measures 403, so
+`letter-good.md` at 429 is 26 over, and `letter-broken.md` at 554 is 151
+over. The broken case was not changed.
 
 On 2026-11-08 the reader was run with `defaults:` set to
 `skills/resume/content-rules.md` and the good case failed. It reported

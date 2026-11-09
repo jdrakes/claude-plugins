@@ -22,7 +22,10 @@ these; where it contradicts one of these, it wins.
 
 - Read every bullet about a past employer as its least charitable current
   employee would: say what was built, never that the company was deficient
-  before it or that something it still runs was eliminated.
+  before it or that something it still runs was eliminated. A before and
+  after number for the owner's own work passes ("cut the nightly run from
+  four hours to twenty minutes"); a sentence describing the employer's
+  system as broken or wasteful does not.
 - Readable beats keywords: a phrase kept only to match a screen goes if the
   line reads worse with it.
 - No on-call or maintenance clauses, and no mechanism jargon a recruiter
