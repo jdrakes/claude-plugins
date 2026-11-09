@@ -426,5 +426,9 @@ taste: five observations from the reasoning behind one personal site.
 | Optional: a tokens or theme file with its choices documented | Those choices are precedent; the skill asks before replacing one |
 | Optional: a taste file, named by you, by a skill of your own that invokes this one, or by your project's `CLAUDE.md` | It replaces the default taste whole; either way it is weighed, never enforced |
 
-To use your own taste everywhere, write a small skill of your own whose
-body names your taste file and invokes `design-review:design-review`.
+To use your own taste for both the skill and the agent, name your taste
+file in your project's `CLAUDE.md`. A small skill of your own whose body
+names the taste file and invokes `design-review:design-review` covers only
+the skill: a direct dispatch of the `design-review:design-review` agent
+never sees it and falls back to the default taste. When you dispatch the
+agent, name the taste file in the task, or wrap the agent too.
