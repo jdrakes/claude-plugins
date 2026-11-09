@@ -47,6 +47,7 @@ LEAK_STRINGS = [
     "974d05a",
     "superpowers",
 ]
+PRIVATE_NEEDLES_VARIABLE = "LEAK_NEEDLES_FILE"
 SCAN_DIR_NAMES = {"skills", "agents", "docs", "evals", "evals2", "tests"}
 EXCLUDED_DIR_NAMES = {".claude-plugin", "scripts", ".git"}
 
@@ -63,14 +64,14 @@ def find_scan_roots(repo_root):
     return roots
 
 
-def scan_file(path):
+def scan_file(path, needles):
     """Return a list of (line_number, needle) hits in one file."""
     hits = []
     try:
         with open(path, "r", encoding="utf-8", errors="replace") as handle:
             for line_number, line in enumerate(handle, start=1):
                 lowered = line.lower()
-                for needle in LEAK_STRINGS:
+                for needle in needles:
                     if needle.lower() in lowered:
                         hits.append((line_number, needle))
     except (IsADirectoryError, PermissionError):
@@ -95,7 +96,7 @@ def publishable_files(repo_root):
     return [line for line in listing if line]
 
 
-def scan_repo(repo_root):
+def scan_repo(repo_root, needles):
     """Return a list of (relative_path, line_number, needle) hits under
     repo_root's skills/, agents/, docs/, evals/, evals2/ and tests/
     directories.
@@ -112,7 +113,7 @@ def scan_repo(repo_root):
                 continue
             if any(part in EXCLUDED_DIR_NAMES for part in parts[:-1]):
                 continue
-            for line_number, needle in scan_file(os.path.join(repo_root, relative_path)):
+            for line_number, needle in scan_file(os.path.join(repo_root, relative_path), needles):
                 all_hits.append((relative_path, line_number, needle))
         return all_hits
     for scan_root in find_scan_roots(repo_root):
@@ -121,16 +122,119 @@ def scan_repo(repo_root):
             for filename in sorted(filenames):
                 file_path = os.path.join(dirpath, filename)
                 relative_path = os.path.relpath(file_path, repo_root)
-                for line_number, needle in scan_file(file_path):
+                for line_number, needle in scan_file(file_path, needles):
                     all_hits.append((relative_path, line_number, needle))
     return all_hits
 
 
-def run_scan(repo_root):
-    hits = scan_repo(repo_root)
+def run_scan(repo_root, needles):
+    hits = scan_repo(repo_root, needles)
     for relative_path, line_number, needle in hits:
         print(f"{relative_path}:{line_number}: {needle}")
     return 1 if hits else 0
+
+
+def parse_needles(text):
+    """One needle per line; blank lines and lines starting with # are ignored."""
+    needles = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            needles.append(stripped)
+    return needles
+
+
+def read_private_needles(environment):
+    """Return (needles, error). needles is None when LEAK_NEEDLES_FILE is
+    unset; error is a message when it is set but cannot be read."""
+    path = environment.get(PRIVATE_NEEDLES_VARIABLE)
+    if not path:
+        return None, None
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            return parse_needles(handle.read()), None
+    except OSError as problem:
+        return None, f"{PRIVATE_NEEDLES_VARIABLE} is set but unreadable: {problem}"
+
+
+def run_checked_scan(repo_root, environment):
+    """Scan with the public list plus the private file, if one is named."""
+    private_needles, error = read_private_needles(environment)
+    if error:
+        print(error)
+        return 1
+    if private_needles is None:
+        print(f"{PRIVATE_NEEDLES_VARIABLE} not set: private needle list not checked")
+        return run_scan(repo_root, LEAK_STRINGS)
+    return run_scan(repo_root, LEAK_STRINGS + private_needles)
+
+
+def capture_stdout(function, *arguments):
+    captured = io.StringIO()
+    original_stdout = sys.stdout
+    sys.stdout = captured
+    try:
+        result = function(*arguments)
+    finally:
+        sys.stdout = original_stdout
+    return result, captured.getvalue()
+
+
+def run_private_needles_self_test():
+    """Invented needles only. Saves and restores the caller's variable so the
+    suite passes whether or not it is set."""
+    temp_dir = tempfile.mkdtemp(prefix="test_no_leaks_private_")
+    saved = os.environ.get(PRIVATE_NEEDLES_VARIABLE)
+    try:
+        clean_root = os.path.join(temp_dir, "clean")
+        planted_root = os.path.join(temp_dir, "planted")
+        for root, text in [(clean_root, "Nothing private here.\n"),
+                           (planted_root, "The zorblaxquent is mentioned here.\n")]:
+            os.makedirs(os.path.join(root, "skills", "example"))
+            with open(os.path.join(root, "skills", "example", "note.md"), "w",
+                      encoding="utf-8") as handle:
+                handle.write(text)
+        needle_path = os.path.join(temp_dir, "needles.txt")
+        with open(needle_path, "w", encoding="utf-8") as handle:
+            handle.write("# a comment naming plimbrotack\n\n  \nzorblaxquent\n")
+
+        os.environ[PRIVATE_NEEDLES_VARIABLE] = needle_path
+        code, output = capture_stdout(run_checked_scan, planted_root, os.environ)
+        assert code == 1, f"planted needle: expected exit 1, got {code}"
+        assert "skills/example/note.md:1: zorblaxquent".replace("/", os.sep) in output, (
+            f"planted needle: hit not printed, got: {output!r}"
+        )
+        assert "not checked" not in output, f"file was read, got: {output!r}"
+
+        code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+        assert code == 0, f"clean repo with needle file: expected exit 0, got {code}"
+
+        # Comment and blank lines are not needles: a comment's words must not hit.
+        with open(os.path.join(clean_root, "skills", "example", "note.md"), "w",
+                  encoding="utf-8") as handle:
+            handle.write("plimbrotack appears here, and so does a blank-ish line.\n")
+        code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+        assert code == 0, f"comment text must not be a needle, got: {output!r}"
+
+        os.environ[PRIVATE_NEEDLES_VARIABLE] = os.path.join(temp_dir, "missing.txt")
+        code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+        assert code == 1, f"missing file: expected exit 1, got {code}"
+        assert PRIVATE_NEEDLES_VARIABLE in output, (
+            f"missing file: message must name the variable, got: {output!r}"
+        )
+
+        del os.environ[PRIVATE_NEEDLES_VARIABLE]
+        code, output = capture_stdout(run_checked_scan, clean_root, os.environ)
+        assert code == 0, f"unset, clean repo: expected exit 0, got {code}"
+        assert "not checked" in output, f"unset: expected not-checked line, got: {output!r}"
+        code, output = capture_stdout(run_checked_scan, planted_root, os.environ)
+        assert code == 0, f"unset: private needle must not be scanned, got: {output!r}"
+    finally:
+        if saved is None:
+            os.environ.pop(PRIVATE_NEEDLES_VARIABLE, None)
+        else:
+            os.environ[PRIVATE_NEEDLES_VARIABLE] = saved
+        shutil.rmtree(temp_dir)
 
 
 def run_self_test():
@@ -188,7 +292,7 @@ def run_self_test():
         original_stdout = sys.stdout
         sys.stdout = captured
         try:
-            exit_code = run_scan(temp_dir)
+            exit_code = run_scan(temp_dir, LEAK_STRINGS)
         finally:
             sys.stdout = original_stdout
 
@@ -222,6 +326,7 @@ def run_self_test():
                 f"expected {expected_line!r} in output, got: {output!r}"
             )
         run_git_self_test()
+        run_private_needles_self_test()
         print("self-test passed")
         return 0
     finally:
@@ -257,7 +362,7 @@ def run_git_self_test():
         original_stdout = sys.stdout
         sys.stdout = captured
         try:
-            exit_code = run_scan(temp_dir)
+            exit_code = run_scan(temp_dir, LEAK_STRINGS)
         finally:
             sys.stdout = original_stdout
 
@@ -279,7 +384,7 @@ def main():
     if "--self-test" in sys.argv:
         sys.exit(run_self_test())
     repo_root = Path(__file__).resolve().parent.parent
-    sys.exit(run_scan(str(repo_root)))
+    sys.exit(run_checked_scan(str(repo_root), os.environ))
 
 
 if __name__ == "__main__":
