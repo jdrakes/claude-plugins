@@ -35,13 +35,15 @@ it stops without pushing so the rollout stays a deliberate second step.
 
 A version must name one set of shipped files. Each plugin keeps a stamp,
 `plugins/<name>/.claude-plugin/shipped.json`, holding its version and a
-SHA-256 over every shipped file. `scripts/check_versions.py` (run by
-`scripts/test.sh`) fails when the files change and the stamp does not, and
-the message names the plugin and says to run `scripts/release.sh`. Shipped
-means everything under the plugin except top-level `tests/`, `evals/` and
-`evals2/` (they do not change how a plugin works), `__pycache__`, `results`,
-`.DS_Store` and the stamp. The check reads the filesystem only, so it gives
-the same answer in a shallow clone.
+SHA-256 over every shipped file's path, executable bit and bytes.
+`scripts/check_versions.py` (run by `scripts/test.sh`) fails when the files
+change and the stamp does not, and the message names the plugin and says to
+run `scripts/release.sh`. Shipped means the files git tracks under the
+plugin (`git ls-files`, read from disk) except top-level `tests/`, `evals/`
+and `evals2/` (they do not change how a plugin works) and the stamp.
+Untracked and ignored files never count. `git ls-files` needs no history, so
+a shallow clone gives the same answer; a copy without `.git` is not
+supported.
 
 ## plan-build
 
