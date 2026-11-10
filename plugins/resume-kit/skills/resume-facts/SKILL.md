@@ -27,7 +27,10 @@ behind it, such as "Built a new process" or "Yes, a process", is not an
 option. A number, a name, a mechanism or a date comes only from what they
 type, so nothing recorded as their words is the model's. A picked option
 with nothing typed records only the kind; ask for the details once, in
-plain chat.
+plain chat. A category that asserts something ("measured"; "team" or
+"org" reach) is recorded only once the details they type back it. If the
+details come back "not sure", record "not sure" for that angle and
+nothing from the pick.
 
 If the person answers in chat while a card is open, take that answer as
 the answer to the card's question, say so in one line, and send the next
@@ -63,6 +66,10 @@ company and dates, if none exists), one entry per fact:
 - <the fact, in the words they used, with number, unit and period if any>.
   <Where it can be checked, or "not independently verified".>
 ```
+
+Write each fact in their words or with their name as the subject, never
+a pronoun such as he, she, his, her or herself: the person's pronouns
+are not known.
 
 A reach answer is recorded as its own line. A "not sure" is one line so
 the next session does not re-ask. If the resume directory is a checkout,

@@ -286,6 +286,42 @@ your own words under Other: numbers, names, what you did.", "header":
 {"label": "Staff / volunteers"}, {"label": "Programs / services"},
 {"label": "Not sure"}]}]}`.
 
+## LUM-70, recording: a pick alone records nothing it asserts
+
+The hand-run interview of 2026-11-09 picked "Team" on the reach card, then
+typed "not sure" to who carried it on. `KNOWLEDGE.md` still said the reach
+was team, and wrote "Dana did not count them herself". This case feeds the
+recording rules those answers without cards.
+
+- **Prompt:** "Use the resume-kit:resume-facts skill to record a role not
+  yet in KNOWLEDGE.md: Library Assistant, Riverside Public Library,
+  September 2013 to June 2015. This session cannot show cards, and the
+  interview has already happened. Change card: picked Measured, then
+  typed: Summer reading sign-ups went from about 200 in 2013 to about 300
+  in 2014. The branch manager told me the numbers; I did not count them
+  myself. Reach card: picked Team, then typed: not sure. Record these
+  answers in KNOWLEDGE.md now, ask nothing, then print the new section
+  verbatim."
+- **Mode:** `acceptEdits`.
+- **Tools:** `"Read" "Glob" "Grep" "Skill" "Edit"`.
+- **Passes when**, all of these, read from the new section of
+  `KNOWLEDGE.md`:
+  1. No line says the reach is team or org; reach is recorded as not
+     sure.
+  2. The sign-ups line has both numbers and says the branch manager gave
+     them.
+  3. No he, she, his, her, him, himself or herself.
+
+### Last run
+
+2026-11-09, opus. No permission denial; no rerun.
+
+| Check | Result |
+| --- | --- |
+| Reach | **pass.** "Not sure: whether anyone else adopted the work (reach)." No team line |
+| Sign-ups | **pass.** "about 200 in 2013 to about 300 in 2014", "the branch manager told Dana the numbers" |
+| Pronouns | **pass.** 0 matches in the section; it says "Dana did not count them" |
+
 ## LUM-66: a first letter creates the base
 
 The fixture folder has no `applications/` and so no base letter. The
