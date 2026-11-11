@@ -46,6 +46,28 @@ name is the first thing a recruiter sees. The builder expands a leading
 session runs from or inside the content file's folder; a relative `-o`
 always is.
 
+When a build stops because a tool is missing (`command not found`,
+`No module named 'yaml'`, or build-variant's pdftotext error), run
+`${CLAUDE_SKILL_DIR}/bin/check-tools`, show its lines word for word,
+and stop. Never route around a missing tool. For example, do not give
+`-o` a file path so that the build skips PyYAML.
+
+### Before a send-ready build
+
+Build the content to the temp folder first and read its text with
+`pdftotext -layout <pdf> -`. Check two things:
+
+- **A bullet over 3 lines.** A bullet runs from its `•` to the line
+  before the next `•`, the next role line or the next section heading.
+  Count its lines in the main column, left of the sidebar.
+- **Mixed tense in one role.** A role whose bullets mix present and
+  past tense, such as "Mentored" beside "Run".
+
+Name each one found, quoting the bullet's first words and its line
+count or the two verbs. Then ask in one line whether to fix it first or
+build as it is, and build the send copy only after the answer. When
+neither is found, build without asking.
+
 ## Variants
 
 A variant is a copy of a content file with some entries removed, such as a
@@ -85,12 +107,41 @@ the user's own content rules go and asks for their send folder. Then tell
 the user to start Claude Code from that folder, since every skill resolves
 its files against the folder it runs from.
 
+The script ends by running `${CLAUDE_SKILL_DIR}/bin/check-tools`.
+When its output starts `Missing tools`, show the person every line
+of it word for word, before anything else, and say that PDFs will not
+build until they run those commands. When it says `All tools found`,
+say nothing about tools.
+
 ## Agent names
 
 The agents ship inside this plugin, so they resolve as
 `resume-kit:resume-writer` and `resume-kit:screener`, not as
 `resume-writer` and `screener`. Dispatching the bare names fails with
 "Agent type not found".
+
+## Changing what the resume says
+
+Every change goes into a draft, never the live file, as
+`${CLAUDE_SKILL_DIR}/content-rules.md` requires: the name and contact
+details, the title, the summary, a skill, a bullet. Replacing the
+starter's example content is a change like any other. The live file is
+the one the content folder's `CLAUDE.md` names under `## Live resume`.
+
+1. If `drafts/<live-name>-draft.yaml` does not exist, copy the live file
+   to it with `cp`, so every comment comes with it.
+2. Change the draft with `Edit`, one value at a time. Never rewrite it
+   with `Write`. Its comments are the format guide for anyone editing by
+   hand (date style, Present for a current role, optional location,
+   `{text, link}` pairs), so every comment line stays, and so does a
+   comment at the end of a value's line.
+3. Tell the person in one line that the change is in the draft, and
+   that the live resume changes only when they say to promote it.
+
+Promoting is their call. When they make it, copy the draft with `cp` to
+the next version at the top level (`resume-v1.yaml` becomes
+`resume-v2.yaml`), change the `## Live resume` line in `CLAUDE.md` to
+name it, and leave the draft and every older version where they are.
 
 ## Writing a role's section from facts
 
@@ -109,8 +160,14 @@ exists. Confirm `KNOWLEDGE.md` holds interview facts for the role, else run
 `defaults:` is `${CLAUDE_SKILL_DIR}/content-rules.md`. `own-rules:` is the
 working directory's `CLAUDE.md` when it has one, else "none".
 
-Relay its report, build the draft to a temporary path, and run
-`resume-kit:resume-review` on it. The summary is not the writer's. Read
+Relay its report and build the draft to a temporary path. Before
+running `resume-kit:resume-review` on it, look for gaps the person
+already knows of: a summary that is still a placeholder or the
+starter's example, a role with no bullets, example content not yet
+replaced. When there is one, do not run the review. Say in one line
+that the cold read waits until those are written and that they can
+ask for it any time. Otherwise run it. A review the person asks for
+always runs. The summary is not the writer's. Read
 `${CLAUDE_SKILL_DIR}/content-rules.md` and the content folder's
 `## Content rules` first, since they bind the summary too; then draft two
 candidates in chat, in the author's register, for the user to pick or
@@ -128,3 +185,17 @@ example and compares that render elementwise against the committed
 baseline, failing on any line whose text, page, column or
 position moved (§7 of `design-spec.md`). If the move was deliberate,
 rerun it with `--update` and commit the new baseline with the change.
+
+## Replies
+
+- A reply that needs a decision starts with it: one plain line per
+  decision, numbered when there is more than one, before any
+  explanation. Detail belongs in the file it is about (`KNOWLEDGE.md`,
+  the draft, the application file), not in the chat.
+- Never show a path inside this plugin, such as one under the plugin
+  cache. Name the person's own files by their place in the content
+  folder, such as `drafts/resume-v1-draft.yaml`.
+- Say what the kit's machinery means for the person, not its name: no
+  slots, rulings, word bars, evidence tables, dispatch lines or agent
+  names. "The letter is 60 words longer than your usual one", not "60
+  over the bar".

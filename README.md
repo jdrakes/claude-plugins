@@ -219,10 +219,10 @@ content folder is refused, so no PDF is written into it. `bin/build-variant`
 builds a variant, a copy with entries removed such as a public copy without a
 phone number. It checks the rendered text to prove they are gone.
 
-**`resume-facts`** interviews you about one role, card by card, through
-`AskUserQuestion`, and records what you say in `KNOWLEDGE.md`. It writes
-only to that file, never to a resume, so a bullet is written from a fact
-rather than invented.
+**`resume-facts`** interviews you about one role, one question at a time,
+through `AskUserQuestion`, with the details always typed in your own words,
+and records what you say in `KNOWLEDGE.md`. It writes only to that file,
+never to a resume, so a bullet is written from a fact rather than invented.
 
 **`resume-review`** is a cold read before a resume is sent: builds the PDF,
 dispatches the `resume-kit:screener` agent, and relays what would stop it
@@ -237,8 +237,9 @@ inventing a gap list.
 
 **`cover-letter`** (`resume-kit:cover-letter`) takes a posting. It audits the
 application form first, picks a base letter from
-`applications/*-base-*-cover-letter.md`, drafts from `KNOWLEDGE.md` and the
-live resume only, measures the draft against the base's own length,
+`applications/*-base-*-cover-letter.md`, or, for a first letter, drafts one
+from `KNOWLEDGE.md` and asks you to approve it, drafts from `KNOWLEDGE.md` and
+the live resume only, measures the draft against the base's own length,
 dispatches `resume-kit:letter-reader`, and renders the `## Letter` section
 alone to PDF with the resume's fonts. A review build goes to the temp
 folder; the send-ready copy goes to an output folder you name with `-o`, as
@@ -276,14 +277,14 @@ Run every resume-kit skill from your resume directory; each one resolves
 its working files against the directory the session is started in, not a
 fixed path.
 
-`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder.
+`skills/resume/bin/new-content-folder <folder>` creates a starting folder: an example content YAML, an empty `KNOWLEDGE.md`, an empty `drafts/`, and a `CLAUDE.md` for your own content rules and your send folder. It ends by naming any missing tool.
 
 | Requirement | Why |
 |---|---|
 | A content YAML | The source of what the resume says; the skill never reads the PDF for this |
 | `KNOWLEDGE.md` | Interview facts `resume-facts` records and `resume-writer` drafts from |
 | A `drafts/` directory | Where a role's section is drafted before it replaces the live file |
-| `applications/` with at least one base letter named `*-base-*-cover-letter.md` | Where `cover-letter` finds the shape and length a new letter follows, and writes each application file. The example is `skills/cover-letter/examples/` |
+| `applications/`, made by `cover-letter` | Where `cover-letter` keeps base letters, named `*-base-*-cover-letter.md`, and each application file. A first letter drafts a base from `KNOWLEDGE.md` and waits for your approval before writing either |
 | An optional `variants/` folder | Each file there is a variant of a content file in the folder above; the example is `skills/resume/examples/variants/public.yaml` |
 | An optional `CLAUDE.md` in the content folder | Its `## Content rules` section adds to resume-kit's default content rules and wins where it contradicts one. `cover-letter` also reads the live resume's file name, any writing-style skill to invoke and the send folder from it |
 
@@ -293,7 +294,11 @@ line from a market file for its gap list. Neither fetches a posting itself.
 
 Toolchain: **typst** (the snapshot baseline in `resume` was generated on
 0.15.1 and verified on 0.14.2, 0.15.0 and 0.15.1), `pdftotext` from
-poppler (required for `build-variant`, which fails without it), and `python3` with `pyyaml`.
+poppler (required for the bullet-length and tense read before every
+send-ready build, and for `build-variant`, which fails without it), and
+`python3` with `pyyaml`. `skills/resume/bin/check-tools` reports any of
+these that is missing, with a command that installs it on a Mac, and
+`new-content-folder` runs it when it creates a folder.
 
 ### The renderer
 

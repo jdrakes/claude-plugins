@@ -57,7 +57,7 @@ is an invented example, and the check is that the review runs end to end.
 - The dispatch is the four lines from `agents/screener.md`, with no
   `defaults:` or `own-rules:`.
 - The report's first line states 1 page read.
-- The report has a Verdict of call, maybe or pass, and at most six
+- The report has a Verdict of call, maybe or no call, and at most six
   findings, each quoting the page.
 - `ls -A` shows exactly `CLAUDE.md`, `KNOWLEDGE.md`, `drafts` and
   `resume-v1.yaml`, and `find` prints nothing.

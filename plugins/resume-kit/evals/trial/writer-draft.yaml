@@ -1,0 +1,37 @@
+name: Dana Whitfield
+title: Science Teacher
+
+summary: >-
+  Summary to come.
+
+details:
+  - Columbus, Ohio
+  - text: (555) 0199
+    link: tel:5550199
+  - text: dana.whitfield@example.com
+    link: mailto:dana.whitfield@example.com
+
+skills:
+  - Scheduling
+  - Budgets
+  - Spreadsheets
+
+experience:
+  - role: Science Teacher
+    company: Northgate Middle School
+    location: Columbus, Ohio
+    start: AUG 2015
+    end: Present
+    bullets: []
+
+  - role: Camp Counselor (summers)
+    company: Maple Hollow Day Camp
+    start: JUN 2017
+    end: AUG 2022
+    bullets:
+      - Scheduled 12 counselors across 3 age groups each week.
+
+education:
+  - degree: Bachelor of Science in Education
+    school: University of Example
+    year: 2015
