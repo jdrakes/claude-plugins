@@ -1,6 +1,6 @@
 ---
 name: resume-facts
-description: "Interviews the user about one role, card by card, and records what they say in KNOWLEDGE.md so bullets are written from facts rather than invented. Use for /resume-facts <company>, \"what should the <company> section say\", \"the current role is thin\", before any bullet is drafted for a role KNOWLEDGE.md does not cover, and whenever the screener or an assessment says a section has no mechanism or scope."
+description: "Interviews the user about one role, card by card, and records what they say in KNOWLEDGE.md so bullets are written from facts rather than invented. Use for /resume-facts [company], \"what should the [company] section say\", \"the current role is thin\", before any bullet is drafted for a role KNOWLEDGE.md does not cover, and whenever the screener or an assessment says a section has no mechanism or scope."
 ---
 
 # resume-facts

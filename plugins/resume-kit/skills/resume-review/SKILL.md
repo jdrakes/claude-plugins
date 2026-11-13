@@ -1,6 +1,6 @@
 ---
 name: resume-review
-description: "A cold read of a resume before it is sent: builds the PDF, dispatches the screener agent, and relays what would stop it getting a screen call, first on its own and then against a named posting. Use for /resume-review, /resume-review <content.yaml>, /resume-review <content.yaml> <posting file>, \"how does this resume read\", \"would this get past a recruiter\", \"read the draft against the <company> posting\", or any request to judge a resume rather than change it."
+description: "A cold read of a resume before it is sent: builds the PDF, dispatches the screener agent, and relays what would stop it getting a screen call, first on its own and then against a named posting. Use for /resume-review, /resume-review [content.yaml], /resume-review [content.yaml] [posting file], \"how does this resume read\", \"would this get past a recruiter\", \"read the draft against the [company] posting\", or any request to judge a resume rather than change it."
 ---
 
 # resume-review

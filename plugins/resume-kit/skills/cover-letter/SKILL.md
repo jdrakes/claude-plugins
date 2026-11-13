@@ -1,6 +1,6 @@
 ---
 name: cover-letter
-description: "Takes a posting and produces a sendable cover letter plus its application file: audits the application form first, picks a base letter and reorders its paragraphs to the posting, drafts from KNOWLEDGE.md and the live resume only, then dispatches the resume-kit:letter-reader agent to read it cold before the user sees it. Use for /cover-letter <url>, \"write a cover letter for this posting\", \"draft a letter for X\", or any request to produce a letter for a named role, even without the words \"cover letter\"."
+description: "Takes a posting and produces a sendable cover letter plus its application file: audits the application form first, picks a base letter and reorders its paragraphs to the posting, drafts from KNOWLEDGE.md and the live resume only, then dispatches the resume-kit:letter-reader agent to read it cold before the user sees it. Use for /cover-letter [url], \"write a cover letter for this posting\", \"draft a letter for X\", or any request to produce a letter for a named role, even without the words \"cover letter\"."
 ---
 
 # cover-letter
