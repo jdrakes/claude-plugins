@@ -22,6 +22,20 @@ write, and `cold-reader`, a cold read of your own writing.
 The old `jdrakes/claude-plan-build` URL still resolves, through GitHub's
 rename redirect.
 
+### On claude.ai
+
+Plugins installed on claude.ai are also available in chat and in Cowork.
+
+1. Open **Customize** in the sidebar, then select **Plugins**.
+2. Select **Add marketplace** and enter `jdrakes/claude-plugins`. claude.ai
+   names the marketplace after the repo, `claude-plugins`, not after the
+   manifest's `jdrakes`.
+3. Select **Discover** and install each plugin you want with **Install**.
+
+claude.ai does not pick up a new plugin or a new release on its own. After
+one is pushed, select **Check for updates** on the `claude-plugins`
+marketplace, or turn on **Sync automatically**.
+
 ## Releasing
 
 Each plugin's manifest pins a `version`. Claude Code only treats a plugin
@@ -48,6 +62,9 @@ git push origin main --follow-tags
 stamp (below), runs `scripts/test.sh` as the gate, then commits and tags
 `<plugin>-v<version>`. It refuses to run against a dirty working tree, and
 it stops without pushing so the rollout stays a deliberate second step.
+
+After the push, select **Check for updates** on the `claude-plugins`
+marketplace on claude.ai (see Install) to roll the release out there.
 
 A version must name one set of shipped files. Each plugin keeps a stamp,
 `plugins/<name>/.claude-plugin/shipped.json`, holding its version and a
